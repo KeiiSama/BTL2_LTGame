@@ -1,94 +1,54 @@
-#include <iostream>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h> //Thêm thư viện SDL_image
-#include <windows.h>
+#include "mainSDL.h"
+#include "main.h"
+#include "startButton.h"
+#include "menu.h"
 
 using namespace std;
+
+const int FPS = 60;  
+const int DELAY_TIME = 1000 / FPS;
+Uint32 frameStart;
+
+GameState gameState;
 
 // Create the window
 int WIDTH = GetSystemMetrics(SM_CXSCREEN);
 int HEIGHT = GetSystemMetrics(SM_CYSCREEN);
 SDL_Window* window = NULL;
 SDL_Surface* screenSurface = NULL;
-SDL_Surface* bkground = NULL;
+SDL_Surface* bkground = SDL_LoadBMP( "bkground.bmp" );
+bool isMouseClicked = false;
+bool isMouseClicked1 = false;
+bool isMouseClicked2 = false;
 
-// Khởi tạo screen
-bool init() 
-{
-    bool success = true;
+// Create Start button
+TTF_Font* font = NULL;
+SDL_Surface* startButtonSurface = NULL;
+SDL_Rect startButtonRect;
+bool isMouseOverStartButton = false; 
 
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) 
-    {
-        cout << "Error: SDL_Init failed" << SDL_GetError() << endl;
-        success = false;
-    }else 
-    {
-        window = SDL_CreateWindow("BTL2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+//Create menu 
+SDL_Surface* menuSurface = NULL;
+SDL_Rect menuButtonRect;
 
-        if(window == NULL)
-        {
-            cout << "Error: SDL_CreateWindow failed" << SDL_GetError() << endl;
-            success = false;
-        }else
-        {
-            screenSurface = SDL_GetWindowSurface(window);
-        }
-    }
+SDL_Surface* onePersonSurface = NULL;
+SDL_Rect onePersonRect;
 
-    return success;
-}
+SDL_Surface* twoPersonSurface = NULL;
+SDL_Rect twoPersonRect;
 
-// Nhập ảnh
-bool loadMedia() 
-{
-    //Loading success flag
-    bool success = true;
+TTF_Font* font1 = NULL;
+TTF_Font* font2 = NULL;
 
-    //Load splash image
-    bkground = SDL_LoadBMP( "bkground.bmp" );
-    if( bkground == NULL )
-    {
-        cout << "Error: SDL_LoadBMP failed" << SDL_GetError() << endl;
-        success = false;
-    }else
-    {
-        for (int x = 0; x < WIDTH; x += bkground->w)
-        {
-            for (int y = 0; y < HEIGHT; y += bkground->h)
-            {
-                SDL_Rect destRect;
-                destRect.w = bkground->w;
-                destRect.h = bkground->h;
-                destRect.x = x;
-                destRect.y = y;
+bool menuHover = false;
+bool onePersonHover = false;
+bool twoPersonHover = false;
 
-                SDL_BlitSurface(bkground, NULL, screenSurface, &destRect);
-            }
-        }
-
-        SDL_UpdateWindowSurface(window);
-    }
-
-    return success;
-}
-
-// Đóng cửa sổ screen
-void close()
-{
-    //Deallocate surface
-    SDL_FreeSurface( bkground );
-    bkground = NULL;
-
-    //Destroy window
-    SDL_DestroyWindow( window );
-    window = NULL;
-
-    //Quit SDL subsystems
-    SDL_Quit();
-}
-
-// Tạo Menu Game
-
+//Create bars
+SDL_Surface* bar1Surface = NULL;
+SDL_Surface* bar2Surface = NULL;
+SDL_Rect bar1Rect;
+SDL_Rect bar2Rect;
 
 int main( int argc, char *argv[] )
 {
@@ -100,17 +60,89 @@ int main( int argc, char *argv[] )
         if(!loadMedia())
         {
             cout << "Error: SDL media failed" << endl;
-        }else
+        }else if(!loadFontStartButton()) {
+            cout << "Error: SDL fonts failed" << endl;
+        }
+        else
         {
             SDL_Event e; 
             bool quit = false; 
-            while( quit == false )
-            { while( SDL_PollEvent( &e ) )
+
+            while( !quit )
+            { 
+                frameStart = SDL_GetTicks();
+                while( SDL_PollEvent( &e ) )
                 { 
-                    if( e.type == SDL_QUIT ) 
+                    if( e.type == SDL_QUIT ) {
                         quit = true; 
-                } 
-            }
+                    }
+                    else if(gameState == START) {
+                        if (e.type == SDL_MOUSEMOTION)
+                        {
+                            int mouseX, mouseY;
+                            SDL_GetMouseState(&mouseX, &mouseY);
+                            mouseHoverStartButton(mouseX, mouseY); 
+                            renderStartButton();
+                        }else if ( e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                            int mouseX, mouseY;
+                            SDL_GetMouseState(&mouseX, &mouseY);
+                            startButtonClicked(mouseX, mouseY);
+                            if (isMouseClicked) 
+                            {    
+                                gameState = MENU;
+                                if(!loadMenuScreen()){
+                                    cout << "ERROR: Couldn't load menu screen" << endl;
+                                }else if(!loadMenu()) {
+                                    cout << "ERROR: Couldn't load menu" << endl;
+                                }
+                            }
+                        } 
+                    }
+                    //if (gameState == MENU)  
+                    else if(gameState == MENU) {                                              
+                        if (e.type == SDL_MOUSEMOTION)
+                        {
+                            int mouseX, mouseY;
+                            SDL_GetMouseState(&mouseX, &mouseY);
+                            menuHoverButton(mouseX, mouseY);
+                            renderMenuButton(); 
+                            
+                            hoverOneButton(mouseX, mouseY);
+                            renderChose1Button(); 
+                            
+                            hoverTwoButton(mouseX, mouseY);
+                            renderChose2Button();
+                        }
+                        else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                            int mouseX, mouseY;
+                            SDL_GetMouseState(&mouseX, &mouseY);
+                            if (onePersonHover) {
+                                int mouseX, mouseY;
+                                SDL_GetMouseState(&mouseX, &mouseY);
+                                oneButtonClicked(mouseX, mouseY);
+                                if (isMouseClicked1) 
+                                {    
+                                    gameState = PLAYING1;
+                                }
+                            }
+                            else if (twoPersonHover) {
+                                int mouseX, mouseY;
+                                SDL_GetMouseState(&mouseX, &mouseY);
+                                twoButtonClicked(mouseX, mouseY);
+                                if (isMouseClicked2) 
+                                {    
+                                    gameState = PLAYING2;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Uint32 frameTime = SDL_GetTicks() - frameStart;
+                if (frameTime < DELAY_TIME) {
+                    SDL_Delay(DELAY_TIME - frameTime);
+                }
+            }  
         }
     }
 
