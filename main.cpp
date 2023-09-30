@@ -2,6 +2,8 @@
 #include "main.h"
 #include "startButton.h"
 #include "menu.h"
+#include "score.h"
+#include "template.h"
 
 using namespace std;
 
@@ -20,6 +22,7 @@ SDL_Surface* bkground = SDL_LoadBMP( "bkground.bmp" );
 bool isMouseClicked = false;
 bool isMouseClicked1 = false;
 bool isMouseClicked2 = false;
+bool isMouseClicked3 = false;
 
 // Create Start button
 TTF_Font* font = NULL;
@@ -37,18 +40,25 @@ SDL_Rect onePersonRect;
 SDL_Surface* twoPersonSurface = NULL;
 SDL_Rect twoPersonRect;
 
+SDL_Surface* exitSurface = NULL;
+SDL_Rect exitButtonRect;
+
 TTF_Font* font1 = NULL;
 TTF_Font* font2 = NULL;
 
 bool menuHover = false;
 bool onePersonHover = false;
 bool twoPersonHover = false;
+bool exitHover = false;
 
-//Create bars
-SDL_Surface* bar1Surface = NULL;
-SDL_Surface* bar2Surface = NULL;
-SDL_Rect bar1Rect;
-SDL_Rect bar2Rect;
+//Render score
+SDL_Surface* scoreSurface = NULL;
+SDL_Rect scoreRect;
+
+TTF_Font* fontScore = NULL;
+
+//Render template
+SDL_Surface* templateSurface = NULL;
 
 int main( int argc, char *argv[] )
 {
@@ -68,9 +78,13 @@ int main( int argc, char *argv[] )
             SDL_Event e; 
             bool quit = false; 
 
+            renderTemplate topPlate(templateSurface, WIDTH/2, 50, 100, 50);
+            renderTemplate bottomPlate(templateSurface, WIDTH/2, HEIGHT - 150, 100, 50);
+
             while( !quit )
             { 
                 frameStart = SDL_GetTicks();
+
                 while( SDL_PollEvent( &e ) )
                 { 
                     if( e.type == SDL_QUIT ) {
@@ -104,7 +118,7 @@ int main( int argc, char *argv[] )
                         {
                             int mouseX, mouseY;
                             SDL_GetMouseState(&mouseX, &mouseY);
-                            menuHoverButton(mouseX, mouseY);
+                            //menuHoverButton(mouseX, mouseY);
                             renderMenuButton(); 
                             
                             hoverOneButton(mouseX, mouseY);
@@ -112,6 +126,9 @@ int main( int argc, char *argv[] )
                             
                             hoverTwoButton(mouseX, mouseY);
                             renderChose2Button();
+
+                            exitHoverButton(mouseX, mouseY);
+                            renderExitButton();
                         }
                         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                             int mouseX, mouseY;
@@ -123,6 +140,9 @@ int main( int argc, char *argv[] )
                                 if (isMouseClicked1) 
                                 {    
                                     gameState = PLAYING1;
+                                    if(!loadScreen()) {
+                                        cout << "ERROR: Failed to load screen"  << endl;
+                                    }
                                 }
                             }
                             else if (twoPersonHover) {
@@ -132,9 +152,53 @@ int main( int argc, char *argv[] )
                                 if (isMouseClicked2) 
                                 {    
                                     gameState = PLAYING2;
+                                    if(!loadScreen()) {
+                                        cout << "ERROR: Failed to load screen"  << endl;
+                                    }
+                                }
+                            }
+                            else if(exitHover) {
+                                int mouseX, mouseY;
+                                SDL_GetMouseState(&mouseX, &mouseY);
+                                exitButtonClicked(mouseX, mouseY);
+                                if (isMouseClicked3) 
+                                {    
+                                    gameState = EXIT;
                                 }
                             }
                         }
+                    }
+                    //if (gameState == PLAYING1)
+                    else if (gameState == PLAYING1) {   
+                        renderScore();
+                        topPlate.renderT();
+                        bottomPlate.renderT();
+
+                        if(e.type == SDL_KEYDOWN) {
+                            switch (e.key.keysym.sym)
+                            {
+                            case SDLK_LEFT:
+                            case SDLK_a:
+                                topPlate.moveLeft();
+                                bottomPlate.moveLeft();
+                                break;
+                                
+                            case SDLK_RIGHT:
+                            case SDLK_d:
+                                topPlate.moveRight();
+                                bottomPlate.moveRight();
+                                break;
+                            }
+                        }
+                        
+                    }
+                    //if (gameState == PLAYING2)
+                    else if (gameState == PLAYING1) {
+                        renderScore();
+                    }
+                    //if (gameState == EXIT)
+                    else if(gameState == EXIT) {
+                        quit = true;
                     }
                 }
 

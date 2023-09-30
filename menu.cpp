@@ -7,7 +7,7 @@ using namespace std;
 bool loadMenu() {
     bool success = true;
 
-    font1 = TTF_OpenFont("ERASBD.TTF", 200);
+    font1 = TTF_OpenFont("ERASBD.TTF", 150);
     font2 = TTF_OpenFont("ERASBD.TTF", 100);
 
     if(!font1 || !font2) {
@@ -16,9 +16,9 @@ bool loadMenu() {
     }else {
         SDL_Color textColor = {RED};
 
-        menuSurface = TTF_RenderText_Solid(font1, "Menu", textColor);
-        onePersonSurface = TTF_RenderText_Solid(font2, "1 NGUOI CHOI", textColor);
-        twoPersonSurface = TTF_RenderText_Solid(font2, "2 NGUOI CHOI", textColor);
+        menuSurface = TTF_RenderText_Solid(font1, "SELECT MODE", textColor);
+        onePersonSurface = TTF_RenderText_Solid(font2, "1 PLAYER", textColor);
+        twoPersonSurface = TTF_RenderText_Solid(font2, "2 PLAYERS", textColor);
 
         if(!menuSurface || !onePersonSurface || !twoPersonSurface) {
             cout << "ERROR: Failed to render" << TTF_GetError() << endl;
@@ -27,22 +27,28 @@ bool loadMenu() {
     }
 
     //Menu Rect
-    menuButtonRect.x = WIDTH / 3;
+    menuButtonRect.x = WIDTH / 4 - 100;
     menuButtonRect.y = 150;
     menuButtonRect.w = 200;
     menuButtonRect.h = 50;
 
     //one Person Rect
-    onePersonRect.x = WIDTH / 3 - 100;
+    onePersonRect.x = WIDTH / 3;
     onePersonRect.y = menuButtonRect.y + menuButtonRect.h + 200; 
     onePersonRect.w = 200;
     onePersonRect.h = 50;
 
     //two Person Rect
-    twoPersonRect.x = WIDTH / 3 - 100;
+    twoPersonRect.x = WIDTH / 3;
     twoPersonRect.y = onePersonRect.y + onePersonRect.h + 100; 
     twoPersonRect.w = 200;
     twoPersonRect.h = 50;
+
+    //exit Rect
+    exitButtonRect.x = WIDTH / 3;
+    exitButtonRect.y = twoPersonRect.y + twoPersonRect.h + 100; 
+    exitButtonRect.w = 200;
+    exitButtonRect.h = 50;
 
     return success;
 }
@@ -77,7 +83,7 @@ bool loadMenuScreen() {
     return success;
 }
 
-void menuHoverButton(int x, int y)
+/*void menuHoverButton(int x, int y)
 {
     if (x >= menuButtonRect.x && x <= (menuButtonRect.x + menuButtonRect.w) &&
         y >= menuButtonRect.y && y <= (menuButtonRect.y + menuButtonRect.h)) {
@@ -85,7 +91,7 @@ void menuHoverButton(int x, int y)
     } else {
         menuHover = false; // Mouse is not over the button
     }
-}
+}*/
 
 void hoverOneButton(int x, int y)
 {
@@ -125,6 +131,24 @@ void twoButtonClicked(int x, int y) {
     }
 }
 
+void exitHoverButton(int x, int y) {
+    if (x >= exitButtonRect.x && x <= (exitButtonRect.x + exitButtonRect.w) &&
+        y >= exitButtonRect.y && y <= (exitButtonRect.y + exitButtonRect.h)) {
+        exitHover = true; // Mouse is over the button
+    } else {
+        exitHover = false; // Mouse is not over the button
+    }
+}
+
+void exitButtonClicked(int x, int y) {
+    if (x >= exitButtonRect.x && x <= (exitButtonRect.x + exitButtonRect.w) &&
+        y >= exitButtonRect.y && y <= (exitButtonRect.y + exitButtonRect.h)) {
+        isMouseClicked3 = true; // Mouse is clicked
+    } else {
+        isMouseClicked3 = false; // Mouse is not clicked
+    }
+}
+
 void renderMenuButton() {
     SDL_Color buttonColor;
     if(menuHover) {
@@ -133,7 +157,7 @@ void renderMenuButton() {
         buttonColor = {WHITE};
     }
 
-    SDL_Surface* coloredButton1 = TTF_RenderText_Solid(font1, "Menu", buttonColor);
+    SDL_Surface* coloredButton1 = TTF_RenderText_Solid(font1, "SELECT MODE", buttonColor);
     
     if(coloredButton1) {
         SDL_BlitSurface(coloredButton1, NULL, screenSurface, &menuButtonRect);
@@ -152,7 +176,7 @@ void renderChose1Button() {
         buttonColor = {WHITE};
     }
 
-    SDL_Surface* coloredButton2 = TTF_RenderText_Solid(font2, "1 NGUOI CHOI", buttonColor);
+    SDL_Surface* coloredButton2 = TTF_RenderText_Solid(font2, "1 PLAYER", buttonColor);
     
     if(coloredButton2) {
         SDL_BlitSurface(coloredButton2, NULL, screenSurface, &onePersonRect);
@@ -171,12 +195,31 @@ void renderChose2Button() {
         buttonColor = {WHITE};
     }
 
-    SDL_Surface* coloredButton3 = TTF_RenderText_Solid(font2, "2 NGUOI CHOI", buttonColor);
+    SDL_Surface* coloredButton3 = TTF_RenderText_Solid(font2, "2 PLAYERS", buttonColor);
     
     if(coloredButton3) {
         SDL_BlitSurface(coloredButton3, NULL, screenSurface, &twoPersonRect);
 
         SDL_FreeSurface(coloredButton3);
+    }
+
+    SDL_UpdateWindowSurface(window);
+}
+
+void renderExitButton() {
+    SDL_Color buttonColor;
+    if(exitHover) {
+        buttonColor = {RED};
+    }else{
+        buttonColor = {WHITE};
+    }
+
+    SDL_Surface* coloredButton4 = TTF_RenderText_Solid(font2, "EXIT", buttonColor);
+    
+    if(coloredButton4) {
+        SDL_BlitSurface(coloredButton4, NULL, screenSurface, &exitButtonRect);
+
+        SDL_FreeSurface(coloredButton4);
     }
 
     SDL_UpdateWindowSurface(window);

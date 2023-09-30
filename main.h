@@ -39,6 +39,7 @@ extern bool isMouseOverStartButton;
 // create menu 
 extern bool isMouseClicked1;
 extern bool isMouseClicked2;
+extern bool isMouseClicked3;
 
 extern SDL_Surface* menuSurface;
 extern SDL_Rect menuButtonRect;
@@ -49,11 +50,21 @@ extern SDL_Rect onePersonRect;
 extern SDL_Surface* twoPersonSurface;
 extern SDL_Rect twoPersonRect;
 
+extern SDL_Surface* exitSurface;
+extern SDL_Rect exitButtonRect;
+
 extern TTF_Font* font1;
 extern TTF_Font* font2;
 
 extern bool menuHover;
 extern bool onePersonHover;
 extern bool twoPersonHover;
+extern bool exitHover;
+
+//Render score
+extern SDL_Surface* scoreSurface;
+extern SDL_Rect scoreRect;
+
+extern TTF_Font* fontScore;
 
 #endif

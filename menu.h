@@ -5,7 +5,7 @@ bool loadMenu();
 
 bool loadMenuScreen();
 
-void menuHoverButton(int x, int y);
+//void menuHoverButton(int x, int y);
 
 void hoverOneButton(int x, int y);
 
@@ -15,10 +15,16 @@ void hoverTwoButton(int x, int y);
 
 void twoButtonClicked(int x, int y);
 
+void exitHoverButton(int x, int y);
+
+void exitButtonClicked(int x, int y);
+
 void renderMenuButton();
 
 void renderChose1Button();
 
 void renderChose2Button();
+
+void renderExitButton();
 
 #endif
