@@ -13,8 +13,8 @@ Uint32 frameStart;
 GameState gameState;
 
 // Create the window
-int WIDTH = 640;
-int HEIGHT = 1000;
+int WIDTH = 0.9*GetSystemMetrics(SM_CXSCREEN);
+int HEIGHT = 0.9*GetSystemMetrics(SM_CYSCREEN);
 SDL_Window* window = NULL;
 SDL_Surface* screenSurface = NULL;
 SDL_Renderer* renderer = NULL;
@@ -52,8 +52,8 @@ bool twoPersonHover = false;
 bool exitHover = false;
 
 // Create template
-Paddle paddleBottom(WIDTH/2, 50, 100, 50);
-Paddle paddleTop(WIDTH/2, HEIGHT - 150, 100, 50);
+Paddle paddleTop(WIDTH/2, 100, WIDTH/5, 10);
+Paddle paddleBottom(WIDTH/2, HEIGHT - 20, WIDTH/5, 10);
 
 void render() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 255);
