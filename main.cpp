@@ -156,14 +156,13 @@ int main( int argc, char *argv[] )
                     else if (gameState == PLAYING1) {   
                         SDL_Event e;
                         bool quit = false;
+                        templateRect.w = 100;
+                        templateRect.h = 50;
+                        templateRect.x = 50;
+                        templateRect.y = 50;
+
 
                         while (!quit) {
-                            // Đặt màu vẽ cho renderer thành màu đen (0, 0, 0, 255)
-                            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-                            // Xóa màn hình bằng màu đen
-                            SDL_RenderClear(renderer);
-
                             while (SDL_PollEvent(&e)) {
                                 if (e.type == SDL_QUIT) {
                                     quit = true;
@@ -182,13 +181,6 @@ int main( int argc, char *argv[] )
                             }
 
                             renderT();
-
-                            // Vẽ thanh template sau khi đã di chuyển
-                            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                            SDL_RenderFillRect(renderer, &templateRect);
-
-                            // Cập nhật renderer
-                            SDL_RenderPresent(renderer);
                         }
 
                     }
