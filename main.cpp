@@ -3,6 +3,7 @@
 #include "startButton.h"
 #include "menu.h"
 #include "template.h"
+#include "cmath"
 
 using namespace std;
 
@@ -11,6 +12,9 @@ const int DELAY_TIME = 1000 / FPS;
 Uint32 frameStart;
 
 GameState gameState;
+
+// Game State
+bool isPlaying = false;
 
 // Create the window
 int WIDTH = 0.9*GetSystemMetrics(SM_CXSCREEN);
@@ -54,6 +58,8 @@ bool exitHover = false;
 // Create template
 Paddle paddleTop(WIDTH/2, 100, WIDTH/5, 10);
 Paddle paddleBottom(WIDTH/2, HEIGHT - 20, WIDTH/5, 10);
+Brick bricks[ROW*COL];
+Ball ball(50, 50);
 
 void render() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 255);
@@ -64,8 +70,41 @@ void render() {
     SDL_RenderFillRect(renderer, &paddleTop);
     SDL_RenderFillRect(renderer, &paddleBottom);
 
+    for(int i=0; i<COL*ROW; i++) {
+        if(!bricks[i].isBreak) {
+            SDL_RenderFillRect(renderer, &bricks[i]);
+        }
+    }
+    int centerX = ball.x;
+    int centerY = ball.y;
+    int radius = ball.radius;
+
+    for (int x = centerX - radius; x <= centerX + radius; x++) {
+        for (int y = centerY - radius; y <= centerY + radius; y++) {
+            if (pow(x - centerX, 2) + pow(y - centerY, 2) <= pow(radius, 2)) {
+                SDL_RenderDrawPoint(renderer, x, y);
+            }
+        }
+    }
+
     // Cập nhật renderer
     SDL_RenderPresent(renderer);
+}
+
+void update(){
+    if (!isPlaying){
+        ball.x = paddleBottom.x + paddleBottom.w/2;
+        ball.y = paddleBottom.y - ball.radius/2 - 10;
+    }
+}
+
+void initialBrick() {
+    int relX = WIDTH/2 - (SPACING+bricks[0].w)*COL/2;
+    int relY = (HEIGHT-80)/2 - (SPACING+bricks[0].h)*ROW/2;
+    for(int i=0; i<COL*ROW; i++) {
+        bricks[i].x=relX+(((i%COL)+1)*SPACING)+((i%COL)*bricks[i].w)-(SPACING/2);
+        bricks[i].y=relY+bricks[i].h*3+(((i%ROW)+1)*SPACING)+((i%ROW)*bricks[i].h)-(SPACING/2);
+    }
 }
 
 int main( int argc, char *argv[] )
@@ -166,10 +205,10 @@ int main( int argc, char *argv[] )
                             }
                         }
                     }
-                    //if (gameState == PLAYING1)
                     else if (gameState == PLAYING1) {   
                         SDL_Event e;
                         bool quit = false;
+                        initialBrick();
 
                         while (!quit) {
                             while (SDL_PollEvent(&e)) {
@@ -190,7 +229,7 @@ int main( int argc, char *argv[] )
                                     }
                                 }
                             }
-
+                            update();
                             render();
                         }
 

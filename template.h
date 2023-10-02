@@ -14,4 +14,20 @@ public:
     void moveRight();
 };
 
+class Brick: public SDL_Rect {
+private:
+    static const int moveSpeed = 20;
+public:
+    Brick(int x = 0, int y = 0);
+    bool isBreak = false;
+};
+
+class Ball {
+private:
+    static const int moveSpeed = 20;
+public:
+    Ball(int x = 0, int y = 0);
+    int x,y,radius;
+};
+
 #endif
