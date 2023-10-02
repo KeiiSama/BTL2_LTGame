@@ -2,8 +2,7 @@
 #include "main.h"
 #include "startButton.h"
 #include "menu.h"
-#include "score.h"
-#include "template.h"
+#include "gamePlaying1.h"
 
 using namespace std;
 
@@ -14,11 +13,12 @@ Uint32 frameStart;
 GameState gameState;
 
 // Create the window
-int WIDTH = GetSystemMetrics(SM_CXSCREEN);
-int HEIGHT = GetSystemMetrics(SM_CYSCREEN);
+int WIDTH = 640;
+int HEIGHT = 1000;
 SDL_Window* window = NULL;
 SDL_Surface* screenSurface = NULL;
-SDL_Surface* bkground = SDL_LoadBMP( "bkground.bmp" );
+SDL_Renderer* renderer = NULL;
+
 bool isMouseClicked = false;
 bool isMouseClicked1 = false;
 bool isMouseClicked2 = false;
@@ -51,14 +51,8 @@ bool onePersonHover = false;
 bool twoPersonHover = false;
 bool exitHover = false;
 
-//Render score
-SDL_Surface* scoreSurface = NULL;
-SDL_Rect scoreRect;
-
-TTF_Font* fontScore = NULL;
-
-//Render template
-SDL_Surface* templateSurface = NULL;
+// Create template
+SDL_Rect templateRect;
 
 int main( int argc, char *argv[] )
 {
@@ -77,9 +71,6 @@ int main( int argc, char *argv[] )
         {
             SDL_Event e; 
             bool quit = false; 
-
-            renderTemplate topPlate(templateSurface, WIDTH/2, 50, 100, 50);
-            renderTemplate bottomPlate(templateSurface, WIDTH/2, HEIGHT - 150, 100, 50);
 
             while( !quit )
             { 
@@ -104,9 +95,8 @@ int main( int argc, char *argv[] )
                             if (isMouseClicked) 
                             {    
                                 gameState = MENU;
-                                if(!loadMenuScreen()){
-                                    cout << "ERROR: Couldn't load menu screen" << endl;
-                                }else if(!loadMenu()) {
+                                SDL_FillRect(screenSurface, NULL, 0);
+                                if(!loadMenu()) {
                                     cout << "ERROR: Couldn't load menu" << endl;
                                 }
                             }
@@ -140,9 +130,6 @@ int main( int argc, char *argv[] )
                                 if (isMouseClicked1) 
                                 {    
                                     gameState = PLAYING1;
-                                    if(!loadScreen()) {
-                                        cout << "ERROR: Failed to load screen"  << endl;
-                                    }
                                 }
                             }
                             else if (twoPersonHover) {
@@ -152,9 +139,6 @@ int main( int argc, char *argv[] )
                                 if (isMouseClicked2) 
                                 {    
                                     gameState = PLAYING2;
-                                    if(!loadScreen()) {
-                                        cout << "ERROR: Failed to load screen"  << endl;
-                                    }
                                 }
                             }
                             else if(exitHover) {
@@ -170,31 +154,47 @@ int main( int argc, char *argv[] )
                     }
                     //if (gameState == PLAYING1)
                     else if (gameState == PLAYING1) {   
-                        renderScore();
-                        topPlate.renderT();
-                        bottomPlate.renderT();
+                        SDL_Event e;
+                        bool quit = false;
 
-                        if(e.type == SDL_KEYDOWN) {
-                            switch (e.key.keysym.sym)
-                            {
-                            case SDLK_LEFT:
-                            case SDLK_a:
-                                topPlate.moveLeft();
-                                bottomPlate.moveLeft();
-                                break;
-                                
-                            case SDLK_RIGHT:
-                            case SDLK_d:
-                                topPlate.moveRight();
-                                bottomPlate.moveRight();
-                                break;
+                        while (!quit) {
+                            // Đặt màu vẽ cho renderer thành màu đen (0, 0, 0, 255)
+                            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+                            // Xóa màn hình bằng màu đen
+                            SDL_RenderClear(renderer);
+
+                            while (SDL_PollEvent(&e)) {
+                                if (e.type == SDL_QUIT) {
+                                    quit = true;
+                                } else if (e.type == SDL_KEYDOWN) {
+                                    switch (e.key.keysym.sym) {
+                                        case SDLK_a:
+                                        case SDLK_LEFT:
+                                            templateRect.x -= MOVESPEED;
+                                            break;
+                                        case SDLK_d:
+                                        case SDLK_RIGHT:
+                                            templateRect.x += MOVESPEED;
+                                            break;
+                                    }
+                                }
                             }
+
+                            renderT();
+
+                            // Vẽ thanh template sau khi đã di chuyển
+                            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                            SDL_RenderFillRect(renderer, &templateRect);
+
+                            // Cập nhật renderer
+                            SDL_RenderPresent(renderer);
                         }
-                        
+
                     }
                     //if (gameState == PLAYING2)
-                    else if (gameState == PLAYING1) {
-                        renderScore();
+                    else if (gameState == PLAYING2) {
+                        
                     }
                     //if (gameState == EXIT)
                     else if(gameState == EXIT) {

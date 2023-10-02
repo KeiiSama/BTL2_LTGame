@@ -20,7 +20,11 @@ bool init()
             success = false;
         }else
         {
-            screenSurface = SDL_GetWindowSurface(window);
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+            if (renderer == NULL) {
+                cout << "Error: SDL renderer creation failed" << SDL_GetError() << endl;
+                success = false;
+            }
         }
     }
 
@@ -34,30 +38,16 @@ bool init()
 
 bool loadMedia() 
 {
-    //Loading success flag
     bool success = true;
-
-    //Load splash image
-    //bkground = SDL_LoadBMP( "bkground.bmp" );
-    if( bkground == NULL )
+    
+    screenSurface = SDL_GetWindowSurface(window);
+    if( screenSurface == NULL )
     {
         cout << "Error: SDL_LoadBMP failed" << SDL_GetError() << endl;
         success = false;
     }else
     {
-        for (int x = 0; x < WIDTH; x += bkground->w)
-        {
-            for (int y = 0; y < HEIGHT; y += bkground->h)
-            {
-                SDL_Rect destRect;
-                destRect.w = bkground->w;
-                destRect.h = bkground->h;
-                destRect.x = x;
-                destRect.y = y;
-
-                SDL_BlitSurface(bkground, NULL, screenSurface, &destRect);
-            }
-        }
+        SDL_FillRect(screenSurface, NULL, 0);
 
         SDL_UpdateWindowSurface(window);
     }
@@ -67,10 +57,6 @@ bool loadMedia()
 
 void close()
 {
-    //Deallocate surface
-    SDL_FreeSurface( bkground );
-    bkground = NULL;
-
     //Destroy window
     SDL_DestroyWindow( window );
     window = NULL;

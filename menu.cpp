@@ -7,8 +7,8 @@ using namespace std;
 bool loadMenu() {
     bool success = true;
 
-    font1 = TTF_OpenFont("ERASBD.TTF", 150);
-    font2 = TTF_OpenFont("ERASBD.TTF", 100);
+    font1 = TTF_OpenFont("ERASBD.TTF", 65);
+    font2 = TTF_OpenFont("ERASBD.TTF", 50);
 
     if(!font1 || !font2) {
         cout << "ERROR: Failed to open font" << TTF_GetError() << endl;
@@ -27,71 +27,31 @@ bool loadMenu() {
     }
 
     //Menu Rect
-    menuButtonRect.x = WIDTH / 4 - 100;
-    menuButtonRect.y = 150;
-    menuButtonRect.w = 200;
-    menuButtonRect.h = 50;
+    menuButtonRect.x = 80;
+    menuButtonRect.y = 350;
+    menuButtonRect.w = 50;
+    menuButtonRect.h = 0;
 
     //one Person Rect
-    onePersonRect.x = WIDTH / 3;
-    onePersonRect.y = menuButtonRect.y + menuButtonRect.h + 200; 
-    onePersonRect.w = 200;
-    onePersonRect.h = 50;
+    onePersonRect.x = 200;
+    onePersonRect.y = menuButtonRect.y + menuButtonRect.h + 150; 
+    onePersonRect.w = 50;
+    onePersonRect.h = 0;
 
     //two Person Rect
-    twoPersonRect.x = WIDTH / 3;
+    twoPersonRect.x = 200;
     twoPersonRect.y = onePersonRect.y + onePersonRect.h + 100; 
-    twoPersonRect.w = 200;
-    twoPersonRect.h = 50;
+    twoPersonRect.w = 50;
+    twoPersonRect.h = 0;
 
     //exit Rect
-    exitButtonRect.x = WIDTH / 3;
+    exitButtonRect.x = 200;
     exitButtonRect.y = twoPersonRect.y + twoPersonRect.h + 100; 
-    exitButtonRect.w = 200;
-    exitButtonRect.h = 50;
+    exitButtonRect.w = 50;
+    exitButtonRect.h = 0;
 
     return success;
 }
-
-bool loadMenuScreen() {
-    bool success = true;
-
-    //Load splash image
-    if( bkground == NULL )
-    {
-        cout << "Error: SDL_LoadBMP failed" << SDL_GetError() << endl;
-        success = false;
-    }else
-    {
-        for (int x = 0; x < WIDTH; x += bkground->w)
-        {
-            for (int y = 0; y < HEIGHT; y += bkground->h)
-            {
-                SDL_Rect destRect;
-                destRect.w = bkground->w;
-                destRect.h = bkground->h;
-                destRect.x = x;
-                destRect.y = y;
-
-                SDL_BlitSurface(bkground, NULL, screenSurface, &destRect);
-            }
-        }
-
-        SDL_UpdateWindowSurface(window);
-    }
-
-    return success;
-}
-
-/*void menuHoverButton(int x, int y)
-{
-    if (x >= menuButtonRect.x && x <= (menuButtonRect.x + menuButtonRect.w) &&
-        y >= menuButtonRect.y && y <= (menuButtonRect.y + menuButtonRect.h)) {
-        menuHover = true; // Mouse is over the button
-    } else {
-        menuHover = false; // Mouse is not over the button
-    }
-}*/
 
 void hoverOneButton(int x, int y)
 {

@@ -8,7 +8,7 @@ using namespace std;
 bool loadFontStartButton() {
     bool success = true;
 
-    font = TTF_OpenFont("ERASBD.TTF", 200);
+    font = TTF_OpenFont("ERASBD.TTF", 100);
     if(!font) {
         cout << "ERROR: Failed to open font" << TTF_GetError() << endl;
         success = false;
@@ -23,10 +23,10 @@ bool loadFontStartButton() {
         }           
     }
 
-    startButtonRect.x = WIDTH / 3;
-    startButtonRect.y = 300;
-    startButtonRect.w = 200;
-    startButtonRect.h = 50;
+    startButtonRect.x = 200;
+    startButtonRect.y = 400;
+    startButtonRect.w = 50;
+    startButtonRect.h = 0;
 
     return success;
 }

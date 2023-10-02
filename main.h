@@ -10,6 +10,7 @@
 #define RED 255,0,0
 #define WHITE 255,255,255
 #define BLACK 0, 0, 0
+#define MOVESPEED 10
 
 enum GameState {
     START,
@@ -25,7 +26,7 @@ extern int WIDTH /* = GetSystemMetrics(SM_CXSCREEN)*/;
 extern int HEIGHT /*= GetSystemMetrics(SM_CYSCREEN)*/;
 extern SDL_Window* window;
 extern SDL_Surface* screenSurface;
-extern SDL_Surface* bkground;
+extern SDL_Renderer* renderer;
 
 extern TTF_Font* font;
 
@@ -61,10 +62,7 @@ extern bool onePersonHover;
 extern bool twoPersonHover;
 extern bool exitHover;
 
-//Render score
-extern SDL_Surface* scoreSurface;
-extern SDL_Rect scoreRect;
-
-extern TTF_Font* fontScore;
+//Create template
+extern SDL_Rect templateRect;
 
 #endif
