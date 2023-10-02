@@ -44,3 +44,11 @@ Ball::Ball(int x, int y)
     this->y=y;
     this->radius=15;
 }
+
+HorizontalLine::HorizontalLine(int y)
+{
+    this->y=y;
+    this->x=x;
+    this->w=WIDTH;
+    this->h=2;
+}
