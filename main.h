@@ -6,6 +6,7 @@
 #include <SDL2/SDL_image.h> //Thêm thư viện SDL_image
 #include <windows.h>
 #include <SDL2/SDL_ttf.h>
+#include <template.h>
 
 #define RED 255,0,0
 #define WHITE 255,255,255
@@ -63,6 +64,7 @@ extern bool twoPersonHover;
 extern bool exitHover;
 
 //Create template
-extern SDL_Rect templateRect;
+extern Paddle paddleTop;
+extern Paddle paddleBottom;
 
 #endif

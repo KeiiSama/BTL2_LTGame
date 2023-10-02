@@ -3,6 +3,7 @@
 #include "startButton.h"
 #include "menu.h"
 #include "gamePlaying1.h"
+#include "template.h"
 
 using namespace std;
 
@@ -52,7 +53,8 @@ bool twoPersonHover = false;
 bool exitHover = false;
 
 // Create template
-SDL_Rect templateRect;
+Paddle paddleBottom(WIDTH/2, 50, 100, 50);
+Paddle paddleTop(WIDTH/2, HEIGHT - 150, 100, 50);
 
 int main( int argc, char *argv[] )
 {
@@ -156,11 +158,6 @@ int main( int argc, char *argv[] )
                     else if (gameState == PLAYING1) {   
                         SDL_Event e;
                         bool quit = false;
-                        templateRect.w = 100;
-                        templateRect.h = 50;
-                        templateRect.x = 50;
-                        templateRect.y = 50;
-
 
                         while (!quit) {
                             while (SDL_PollEvent(&e)) {
@@ -170,17 +167,19 @@ int main( int argc, char *argv[] )
                                     switch (e.key.keysym.sym) {
                                         case SDLK_a:
                                         case SDLK_LEFT:
-                                            templateRect.x -= MOVESPEED;
+                                            paddleTop.moveLeft();
+                                            paddleBottom.moveLeft();
                                             break;
                                         case SDLK_d:
                                         case SDLK_RIGHT:
-                                            templateRect.x += MOVESPEED;
+                                            paddleTop.moveRight();
+                                            paddleBottom.moveRight();
                                             break;
                                     }
                                 }
                             }
 
-                            renderT();
+                            render();
                         }
 
                     }

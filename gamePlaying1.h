@@ -4,7 +4,7 @@
 #include "main.h"
 #include "mainSDL.h"
 
-void renderT();
+void render();
 
 
 #endif
