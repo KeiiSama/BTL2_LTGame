@@ -7,7 +7,7 @@ using namespace std;
 bool loadMenu() {
     bool success = true;
 
-    font1 = TTF_OpenFont("ERASBD.TTF", 65);
+    font1 = TTF_OpenFont("ERASBD.TTF", 100);
     font2 = TTF_OpenFont("ERASBD.TTF", 50);
 
     if(!font1 || !font2) {
@@ -27,25 +27,25 @@ bool loadMenu() {
     }
 
     //Menu Rect
-    menuButtonRect.x = 80;
-    menuButtonRect.y = 350;
+    menuButtonRect.x = WIDTH/3 - 100;
+    menuButtonRect.y = HEIGHT/3;
     menuButtonRect.w = 50;
     menuButtonRect.h = 0;
 
     //one Person Rect
-    onePersonRect.x = 200;
+    onePersonRect.x = WIDTH/3 + 100;
     onePersonRect.y = menuButtonRect.y + menuButtonRect.h + 150; 
     onePersonRect.w = 50;
     onePersonRect.h = 0;
 
     //two Person Rect
-    twoPersonRect.x = 200;
+    twoPersonRect.x = WIDTH/3 + 100;
     twoPersonRect.y = onePersonRect.y + onePersonRect.h + 100; 
     twoPersonRect.w = 50;
     twoPersonRect.h = 0;
 
     //exit Rect
-    exitButtonRect.x = 200;
+    exitButtonRect.x = WIDTH/3 + 100;
     exitButtonRect.y = twoPersonRect.y + twoPersonRect.h + 100; 
     exitButtonRect.w = 50;
     exitButtonRect.h = 0;
