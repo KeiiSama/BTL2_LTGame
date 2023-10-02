@@ -57,7 +57,9 @@ bool exitHover = false;
 
 // Create template
 Paddle paddleTop(WIDTH/2, 100, WIDTH/5, 10);
+HorizontalLine lineTop(95);
 Paddle paddleBottom(WIDTH/2, HEIGHT - 20, WIDTH/5, 10);
+HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW*COL];
 Ball ball(50, 50);
 
@@ -69,6 +71,8 @@ void render() {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &paddleTop);
     SDL_RenderFillRect(renderer, &paddleBottom);
+    SDL_RenderFillRect(renderer, &lineTop);
+    SDL_RenderFillRect(renderer, &lineBottom);
 
     for(int i=0; i<COL*ROW; i++) {
         if(!bricks[i].isBreak) {
