@@ -13,11 +13,13 @@ Paddle::Paddle(int x, int y, int width, int height)
 void Paddle::moveLeft()
 {
     this->x -= moveSpeed;
+    this->validatePosition();
 }
 
 void Paddle::moveRight()
 {
     this->x += moveSpeed;
+    this->validatePosition();
 }
 
 void Paddle::validatePosition()
