@@ -16,6 +16,8 @@
 #define ROW 8 // even
 #define PI 3.14159265358979323846
 #define SPACING 16
+#define SIZE 15
+#define BALL_SPEED 8
 
 enum GameState {
     START,

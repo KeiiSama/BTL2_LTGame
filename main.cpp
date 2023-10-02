@@ -14,7 +14,7 @@ Uint32 frameStart;
 GameState gameState;
 
 // Game State
-bool isPlaying = false;
+bool isPlaying = true;
 
 // Create the window
 int WIDTH = 0.9*GetSystemMetrics(SM_CXSCREEN);
@@ -61,11 +61,17 @@ HorizontalLine lineTop(95);
 Paddle paddleBottom(WIDTH/2, HEIGHT - 20, WIDTH/5, 10);
 HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW*COL];
-Ball ball(50, 50);
+SDL_Rect ball;
+float velY, velX;
 
 void render() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 255);
     SDL_RenderClear(renderer);
+
+    Uint32 frameTime = SDL_GetTicks() - frameStart;
+    if (frameTime < DELAY_TIME) {
+        SDL_Delay(DELAY_TIME - frameTime);
+    }
 
     // Vẽ thanh template
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -79,17 +85,7 @@ void render() {
             SDL_RenderFillRect(renderer, &bricks[i]);
         }
     }
-    int centerX = ball.x;
-    int centerY = ball.y;
-    int radius = ball.radius;
-
-    for (int x = centerX - radius; x <= centerX + radius; x++) {
-        for (int y = centerY - radius; y <= centerY + radius; y++) {
-            if (pow(x - centerX, 2) + pow(y - centerY, 2) <= pow(radius, 2)) {
-                SDL_RenderDrawPoint(renderer, x, y);
-            }
-        }
-    }
+    SDL_RenderFillRect(renderer, &ball);
 
     // Cập nhật renderer
     SDL_RenderPresent(renderer);
@@ -98,11 +94,41 @@ void render() {
 void update(){
     if (!isPlaying){
         ball.x = paddleBottom.x + paddleBottom.w/2;
-        ball.y = paddleBottom.y - ball.radius/2 - 10;
+        ball.y = paddleBottom.y - 7 - 10;
+    } else {
+        if(SDL_HasIntersection(&ball, &paddleBottom)) {
+            double rel=(paddleBottom.x+(paddleBottom.w/2))-(ball.x+(SIZE/2));
+            double norm=rel/(paddleBottom.w/2);
+            double bounce = norm* (5*PI/12);
+            velY=-BALL_SPEED*cos(bounce);
+            velX=BALL_SPEED*-sin(bounce);
+        }
+         if(ball.y<=0) velY=-velY;
+        if(ball.y+SIZE>=HEIGHT) velY=-velY;
+        if(ball.x<=0 || ball.x+SIZE>=WIDTH) velX=-velX;
+        ball.x+=velX;
+        ball.y+=velY;
+
+        for(int i=0; i<COL*ROW; i++) {
+            if (!bricks[i].isBreak){
+                if(SDL_HasIntersection(&ball, &bricks[i])) {
+                bricks[i].isBreak=true;
+                if(ball.x >= bricks[i].x) {velX=-velX; ball.x-=20;}
+                if(ball.x <= bricks[i].x) {velX=-velX; ball.x+=20;}
+                if(ball.y <= bricks[i].y) {velY=-velY; ball.y-=20;}
+                if(ball.y >= bricks[i].y) {velY=-velY; ball.y+=20;}
+                }
+            }
+        }
     }
 }
 
 void initialBrick() {
+    velY=BALL_SPEED/2;
+    velX=0;
+    ball.w = ball.h = SIZE;
+    ball.x=WIDTH/2-(SIZE/2);
+    ball.y=paddleBottom.y-(paddleBottom.h*4);
     int relX = WIDTH/2 - (SPACING+bricks[0].w)*COL/2;
     int relY = (HEIGHT-80)/2 - (SPACING+bricks[0].h)*ROW/2;
     for(int i=0; i<COL*ROW; i++) {
