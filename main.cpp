@@ -168,21 +168,31 @@ void update()
                 if (SDL_HasIntersection(&ball, &bricks[i]))
                 {
                     bricks[i].isBreak = true;
-                    if (ball.x >= bricks[i].x)
-                    {
-                        ball.velX = -ball.velX;
-                    }
                     if (ball.x <= bricks[i].x)
                     {
+                        // canh trai
                         ball.velX = -ball.velX;
                     }
-                    if (ball.y <= bricks[i].y)
+                    else
                     {
-                        ball.velY = -ball.velY;
-                    }
-                    if (ball.y >= bricks[i].y)
-                    {
-                        ball.velY = -ball.velY;
+                        if (ball.y <= bricks[i].y)
+                        {
+                            // canh tren
+                            ball.velY = -ball.velY;
+                        }
+                        else
+                        {
+                            if (bricks[i].x + bricks[i].w - ball.x < 2)
+                            {
+                                // canh phai
+                                ball.velX = -ball.velX;
+                            }
+                            else
+                            {
+                                // canh duoi
+                                ball.velY = -ball.velY;
+                            }
+                        }
                     }
                 }
             }
