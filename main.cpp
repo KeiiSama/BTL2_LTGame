@@ -15,7 +15,6 @@ Uint32 frameStart;
 GameState gameState;
 
 // Game State
-bool isPlaying = true;
 
 // Create the window
 int WIDTH = 0.9 * GetSystemMetrics(SM_CXSCREEN);
@@ -62,8 +61,7 @@ HorizontalLine lineTop(95);
 Paddle paddleBottom(WIDTH / 2, HEIGHT - 20, WIDTH / 5, 10);
 HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW * COL];
-SDL_Rect ball;
-float velY, velX;
+Ball ball;
 
 void delay()
 {
@@ -108,9 +106,15 @@ void render()
     SDL_RenderPresent(renderer);
 }
 
+void processGameOver()
+{
+    ball.setVel(0, 0);
+    ball.velY = -ball.velY;
+}
+
 void update()
 {
-    if (!isPlaying)
+    if (ball.isStopping())
     {
         ball.x = paddleBottom.x + paddleBottom.w / 2;
         ball.y = paddleBottom.y - 7 - 10;
@@ -119,20 +123,21 @@ void update()
     {
         if (SDL_HasIntersection(&ball, &paddleBottom))
         {
-            double rel = (paddleBottom.x + (paddleBottom.w / 2)) - (ball.x + (SIZE / 2));
+            double rel = (paddleBottom.x + (paddleBottom.w / 2)) - (ball.x + (ball.size / 2));
             double norm = rel / (paddleBottom.w / 2);
             double bounce = norm * (5 * PI / 12);
-            velY = -BALL_SPEED * cos(bounce);
-            velX = BALL_SPEED * -sin(bounce);
+            ball.setVel(-ball.speed * sin(bounce), -ball.speed * cos(bounce));
         }
-        if (ball.y <= 0)
-            velY = -velY;
-        if (ball.y + SIZE >= HEIGHT)
-            velY = -velY;
-        if (ball.x <= 0 || ball.x + SIZE >= WIDTH)
-            velX = -velX;
-        ball.x += velX;
-        ball.y += velY;
+        if (SDL_HasIntersection(&ball, &paddleTop))
+        {
+            double rel = (paddleTop.x + (paddleTop.w / 2)) - (ball.x + (ball.size / 2));
+            double norm = rel / (paddleTop.w / 2);
+            double bounce = norm * (5 * PI / 12);
+            ball.setVel(ball.speed * sin(bounce), ball.speed * cos(bounce));
+        }
+        if (SDL_HasIntersection(&ball, &lineBottom) || SDL_HasIntersection(&ball, &lineTop))
+            processGameOver();
+        ball.move();
 
         for (int i = 0; i < COL * ROW; i++)
         {
@@ -143,23 +148,19 @@ void update()
                     bricks[i].isBreak = true;
                     if (ball.x >= bricks[i].x)
                     {
-                        velX = -velX;
-                        ball.x -= 20;
+                        ball.velX = -ball.velX;
                     }
                     if (ball.x <= bricks[i].x)
                     {
-                        velX = -velX;
-                        ball.x += 20;
+                        ball.velX = -ball.velX;
                     }
                     if (ball.y <= bricks[i].y)
                     {
-                        velY = -velY;
-                        ball.y -= 20;
+                        ball.velY = -ball.velY;
                     }
                     if (ball.y >= bricks[i].y)
                     {
-                        velY = -velY;
-                        ball.y += 20;
+                        ball.velY = -ball.velY;
                     }
                 }
             }
@@ -169,10 +170,7 @@ void update()
 
 void initialBrick()
 {
-    velY = BALL_SPEED / 2;
-    velX = 0;
-    ball.w = ball.h = SIZE;
-    ball.x = WIDTH / 2 - (SIZE / 2);
+    ball.x = WIDTH / 2 - (ball.size / 2);
     ball.y = paddleBottom.y - (paddleBottom.h * 4);
     int relX = WIDTH / 2 - (SPACING + bricks[0].w) * COL / 2;
     int relY = (HEIGHT - 80) / 2 - (SPACING + bricks[0].h) * ROW / 2;
@@ -312,6 +310,9 @@ int main(int argc, char *argv[])
                                 {
                                     switch (e.key.keysym.sym)
                                     {
+                                    case SDLK_SPACE:
+                                        ball.setVel(0, ball.speed / 2);
+                                        break;
                                     case SDLK_a:
                                     case SDLK_LEFT:
                                         paddleTop.moveLeft();

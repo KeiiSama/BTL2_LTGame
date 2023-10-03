@@ -7,7 +7,7 @@
 class Paddle : public SDL_Rect
 {
 private:
-    static const int moveSpeed = 20;
+    static const int moveSpeed = 30;
     void validatePosition();
 
 public:
@@ -23,14 +23,17 @@ public:
     bool isBreak = false;
 };
 
-class Ball
+class Ball : public SDL_Rect
 {
-private:
-    static const int moveSpeed = 20;
-
 public:
-    Ball(int x = 0, int y = 0);
-    int x, y, radius;
+    static const int size = 15;
+    static const int speed = 8;
+    float velY, velX;
+    Ball(int x = 100, int y = 100);
+    void move();
+    void setPosition(int x, int y);
+    void setVel(int velX, int velY);
+    bool isStopping();
 };
 
 class HorizontalLine : public SDL_Rect
