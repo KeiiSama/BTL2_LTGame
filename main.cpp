@@ -4,6 +4,7 @@
 #include "menu.h"
 #include "template.h"
 #include "cmath"
+#include "gameOver.h"
 
 using namespace std;
 
@@ -69,9 +70,22 @@ int level = 1;
 
 // Set timer
 SDL_Rect timerRect = {WIDTH - 400, 30, 0, 0};
-int time = 120;
+int time = 30;
 int currentTime = 0;
 int preTime = 0;
+
+// Game Over
+SDL_Rect gameOverRect = {WIDTH/4 - 100, HEIGHT/3 - 100, 0, 0};
+
+SDL_Rect showScoreRect = {WIDTH/4, gameOverRect.y + 200, 0, 0};
+
+SDL_Rect button1Rect = {WIDTH/3, showScoreRect.y + 150, 0, 0};
+bool isButton1Hovered = false;
+bool isButton1Clicked = false;
+
+SDL_Rect button2Rect = {WIDTH/3 + 150, button1Rect.y + 100, 0, 0};
+bool isButton2Hovered = false;
+bool isButton2Clicked = false;
 
 void delay()
 {
@@ -333,6 +347,19 @@ void processPlaying2(int key)
     }
 }
 
+/*void renderGameOverScreen() {
+    SDL_FillRect(screenSurface, NULL, 0);
+
+    SDL_Surface* coloredButton1 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 100), "GAME OVER", {WHITE});
+    SDL_Surface* coloredButton2 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 75), 
+                                                            ("YOUR SCORE: " + to_string(score)).c_str(), {WHITE});
+
+    SDL_BlitSurface(coloredButton1, NULL, screenSurface, &gameOverRect);
+    SDL_BlitSurface(coloredButton2, NULL, screenSurface, &showScoreRect);
+
+    SDL_UpdateWindowSurface(window);
+}*/
+
 int main(int argc, char *argv[])
 {
     if (!init())
@@ -464,7 +491,7 @@ int main(int argc, char *argv[])
                                     else
                                         processPlaying2(e.key.keysym.sym);
 
-                                    if (e.key.keysym.sym == SDLK_SPACE && time == 120 && !timerStarted)
+                                    if (e.key.keysym.sym == SDLK_SPACE && time == 30 && !timerStarted)
                                     {
                                         currentTime = SDL_GetTicks();
                                         preTime = currentTime;
@@ -472,11 +499,13 @@ int main(int argc, char *argv[])
                                     }
                                 }
                             }
-                            if(timerStarted) {
+                            if (timerStarted)
+                            {
                                 currentTime = SDL_GetTicks();
                                 int elapsedTime = currentTime - preTime;
 
-                                if(time > 0 && elapsedTime >= 1000) {
+                                if (time > 0 && elapsedTime >= 1000)
+                                {
                                     time--;
                                     preTime = currentTime;
                                 }
@@ -485,6 +514,68 @@ int main(int argc, char *argv[])
                             delay();
                             update();
                             renderPlayingGame();
+
+                            if (time == 0)
+                            {
+                                gameState = GAMEOVER;
+                                quit = true; 
+                            }
+                        }
+                    }
+                    else if(gameState == GAMEOVER) {
+                        //renderGameOverScreen();
+                        SDL_FillRect(screenSurface, NULL, 0);
+
+                        SDL_Event e;
+                        bool quit = false;
+
+                        while (!quit)
+                        {
+                            while(SDL_PollEvent(&e)) 
+                            {
+                                if(e.type == SDL_QUIT) {
+                                    quit = true;
+                                }
+                                else if (e.type == SDL_MOUSEMOTION)
+                                {
+                                    int mouseX, mouseY;
+                                    SDL_GetMouseState(&mouseX, &mouseY);
+
+                                    renderGameOver();
+                                    renderShowScore();
+
+                                    isButton1Hover(mouseX, mouseY);
+                                    renderButton1();
+
+                                    isButton2Hover(mouseX, mouseY);
+                                    renderButton2();
+
+                                }
+                                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
+                                {
+                                    int mouseX, mouseY;
+                                    SDL_GetMouseState(&mouseX, &mouseY);
+                                    if (isButton1Hovered)
+                                    {
+                                        isButton1Click(mouseX, mouseY);
+                                        if (isButton1Clicked)
+                                        {
+                                            SDL_FillRect(screenSurface, NULL, 0);
+                                            gameState = MENU;
+                                            quit = true;
+                                        }
+                                    }
+                                    else if (isButton2Hovered)
+                                    {
+                                        isButton2Click(mouseX, mouseY);
+                                        if (isButton2Clicked)
+                                        {
+                                            gameState = EXIT;
+                                            quit = true;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     else if (gameState == EXIT)

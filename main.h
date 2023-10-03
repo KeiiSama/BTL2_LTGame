@@ -24,6 +24,7 @@ enum GameState
     MENU,
     PLAYING1,
     PLAYING2,
+    GAMEOVER,
     EXIT,
 };
 
@@ -73,5 +74,20 @@ extern bool menuHover;
 extern bool onePersonHover;
 extern bool twoPersonHover;
 extern bool exitHover;
+
+extern int score;
+
+// Game Over
+extern SDL_Rect gameOverRect;
+
+extern SDL_Rect showScoreRect;
+
+extern SDL_Rect button1Rect;
+extern bool isButton1Hovered;
+extern bool isButton1Clicked;
+
+extern SDL_Rect button2Rect;
+extern bool isButton2Hovered;
+extern bool isButton2Clicked;
 
 #endif
