@@ -202,26 +202,38 @@ void update()
                     if (ball.x <= bricks[i].x)
                     {
                         // canh trai
-                        ball.velX = -ball.velX;
+                        if (ball.velX == 0)
+                            ball.velY = -ball.velY;
+                        else
+                            ball.velX = -ball.velX;
                     }
                     else
                     {
                         if (ball.y <= bricks[i].y)
                         {
                             // canh tren
-                            ball.velY = -ball.velY;
+                            if (ball.velY == 0)
+                                ball.velX = -ball.velX;
+                            else
+                                ball.velY = -ball.velY;
                         }
                         else
                         {
                             if (bricks[i].x + bricks[i].w - ball.x < 2)
                             {
                                 // canh phai
-                                ball.velX = -ball.velX;
+                                if (ball.velX == 0)
+                                    ball.velY = -ball.velY;
+                                else
+                                    ball.velX = -ball.velX;
                             }
                             else
                             {
                                 // canh duoi
-                                ball.velY = -ball.velY;
+                                if (ball.velY == 0)
+                                    ball.velX = -ball.velX;
+                                else
+                                    ball.velY = -ball.velY;
                             }
                         }
                     }
