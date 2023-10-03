@@ -142,6 +142,15 @@ void processGameOver()
     ball.velY = -ball.velY;
 }
 
+void overComeLevel()
+{
+    level++;
+    for (int i = 0; i < ROW * COL; i++)
+    {
+        bricks[i].isBreak = false;
+    }
+}
+
 void update()
 {
     if (ball.isStopping())
@@ -175,6 +184,7 @@ void update()
                 processGameOver();
         ball.move();
 
+        int countBrick = 0;
         for (int i = 0; i < COL * ROW; i++)
         {
             if (!bricks[i].isBreak)
@@ -216,6 +226,14 @@ void update()
                         }
                     }
                 }
+            }
+            else
+            {
+                countBrick++;
+            }
+            if (countBrick == ROW * COL)
+            {
+                overComeLevel();
             }
         }
     }
