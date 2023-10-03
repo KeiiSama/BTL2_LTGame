@@ -61,6 +61,10 @@ Paddle paddleBottom(WIDTH / 2, HEIGHT - 20, WIDTH / 5, 10);
 HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW * COL];
 Ball ball;
+int life = 3;
+int score = 0;
+int countScore = 0;
+int level = 1;
 
 void delay()
 {
@@ -111,9 +115,13 @@ void renderPlayingGame()
         SDL_RenderFillRect(renderer, &paddleBottom);
     }
 
-    SDL_SetRenderDrawColor(renderer, WHITE, 255);
+    if (life > 0)
+        SDL_SetRenderDrawColor(renderer, RED, 255);
+    else
+        SDL_SetRenderDrawColor(renderer, WHITE, 255);
     SDL_RenderFillRect(renderer, &lineTop);
     SDL_RenderFillRect(renderer, &lineBottom);
+    SDL_SetRenderDrawColor(renderer, WHITE, 255);
 
     for (int i = 0; i < COL * ROW; i++)
     {
@@ -158,7 +166,13 @@ void update()
             ball.setVel(-ball.speed * sin(bounce), ball.speed * cos(bounce));
         }
         if (SDL_HasIntersection(&ball, &lineBottom) || SDL_HasIntersection(&ball, &lineTop))
-            processGameOver();
+            if (life > 0)
+            {
+                life--;
+                ball.velY = -ball.velY;
+            }
+            else
+                processGameOver();
         ball.move();
 
         for (int i = 0; i < COL * ROW; i++)
@@ -168,6 +182,13 @@ void update()
                 if (SDL_HasIntersection(&ball, &bricks[i]))
                 {
                     bricks[i].isBreak = true;
+                    score++;
+                    countScore++;
+                    if (countScore == 20)
+                    {
+                        countScore = 0;
+                        life++;
+                    }
                     if (ball.x <= bricks[i].x)
                     {
                         // canh trai
