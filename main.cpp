@@ -7,14 +7,13 @@
 
 using namespace std;
 
-const int FPS = 24;
-const int DELAY_TIME = 1000 / FPS;
+// Timer
 int frameCount, timerFPS, lastFrame, fps, lastTime = 0;
-Uint32 frameStart;
-
-GameState gameState;
 
 // Game State
+GameState gameState;
+PaddleSelect player1 = BOTTOM;
+PaddleSelect player2 = TOP;
 
 // Create the window
 int WIDTH = 0.9 * GetSystemMetrics(SM_CXSCREEN);
@@ -81,15 +80,38 @@ void delay()
     }
 }
 
-void render()
+void renderPlayingGame()
 {
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 255);
+    SDL_SetRenderDrawColor(renderer, BLACK, 255);
     SDL_RenderClear(renderer);
 
     // Vẽ thanh template
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &paddleTop);
-    SDL_RenderFillRect(renderer, &paddleBottom);
+    SDL_SetRenderDrawColor(renderer, WHITE, 255);
+    if (gameState == PLAYING1)
+    {
+        if (player1 == TOP)
+        {
+            SDL_RenderFillRect(renderer, &paddleBottom);
+            SDL_SetRenderDrawColor(renderer, RED, 255);
+            SDL_RenderFillRect(renderer, &paddleTop);
+        }
+        if (player1 == BOTTOM)
+        {
+            SDL_RenderFillRect(renderer, &paddleTop);
+            SDL_SetRenderDrawColor(renderer, RED, 255);
+            SDL_RenderFillRect(renderer, &paddleBottom);
+        }
+    }
+
+    if (gameState == PLAYING2)
+    {
+        SDL_SetRenderDrawColor(renderer, RED, 255);
+        SDL_RenderFillRect(renderer, &paddleTop);
+        SDL_SetRenderDrawColor(renderer, GREEN, 255);
+        SDL_RenderFillRect(renderer, &paddleBottom);
+    }
+
+    SDL_SetRenderDrawColor(renderer, WHITE, 255);
     SDL_RenderFillRect(renderer, &lineTop);
     SDL_RenderFillRect(renderer, &lineBottom);
 
@@ -133,7 +155,7 @@ void update()
             double rel = (paddleTop.x + (paddleTop.w / 2)) - (ball.x + (ball.size / 2));
             double norm = rel / (paddleTop.w / 2);
             double bounce = norm * (5 * PI / 12);
-            ball.setVel(ball.speed * sin(bounce), ball.speed * cos(bounce));
+            ball.setVel(-ball.speed * sin(bounce), ball.speed * cos(bounce));
         }
         if (SDL_HasIntersection(&ball, &lineBottom) || SDL_HasIntersection(&ball, &lineTop))
             processGameOver();
@@ -170,14 +192,68 @@ void update()
 
 void initialBrick()
 {
-    ball.x = WIDTH / 2 - (ball.size / 2);
-    ball.y = paddleBottom.y - (paddleBottom.h * 4);
     int relX = WIDTH / 2 - (SPACING + bricks[0].w) * COL / 2;
     int relY = (HEIGHT - 80) / 2 - (SPACING + bricks[0].h) * ROW / 2;
     for (int i = 0; i < COL * ROW; i++)
     {
         bricks[i].x = relX + (((i % COL) + 1) * SPACING) + ((i % COL) * bricks[i].w) - (SPACING / 2);
         bricks[i].y = relY + bricks[i].h * 3 + (((i % ROW) + 1) * SPACING) + ((i % ROW) * bricks[i].h) - (SPACING / 2);
+    }
+}
+
+void processPlaying1(int key)
+{
+    switch (key)
+    {
+    case SDLK_DOWN:
+    case SDLK_s:
+        if (player1 == TOP)
+            player1 = BOTTOM;
+        break;
+    case SDLK_UP:
+    case SDLK_w:
+        if (player1 == BOTTOM)
+            player1 = TOP;
+        break;
+    case SDLK_SPACE:
+        ball.setVel(0, ball.speed / 2);
+        break;
+    case SDLK_a:
+    case SDLK_LEFT:
+        if (player1 == TOP)
+            paddleTop.moveLeft();
+        if (player1 == BOTTOM)
+            paddleBottom.moveLeft();
+        break;
+    case SDLK_d:
+    case SDLK_RIGHT:
+        if (player1 == TOP)
+            paddleTop.moveRight();
+        if (player1 == BOTTOM)
+            paddleBottom.moveRight();
+        break;
+    }
+}
+
+void processPlaying2(int key)
+{
+    switch (key)
+    {
+    case SDLK_SPACE:
+        ball.setVel(0, ball.speed / 2);
+        break;
+    case SDLK_a:
+        paddleTop.moveLeft();
+        break;
+    case SDLK_LEFT:
+        paddleBottom.moveLeft();
+        break;
+    case SDLK_d:
+        paddleTop.moveRight();
+        break;
+    case SDLK_RIGHT:
+        paddleBottom.moveRight();
+        break;
     }
 }
 
@@ -204,8 +280,6 @@ int main(int argc, char *argv[])
 
             while (!quit)
             {
-                frameStart = SDL_GetTicks();
-
                 while (SDL_PollEvent(&e))
                 {
                     if (e.type == SDL_QUIT)
@@ -292,12 +366,11 @@ int main(int argc, char *argv[])
                             }
                         }
                     }
-                    else if (gameState == PLAYING1)
+                    else if (gameState == PLAYING1 || gameState == PLAYING2)
                     {
                         SDL_Event e;
                         bool quit = false;
                         initialBrick();
-
                         while (!quit)
                         {
                             while (SDL_PollEvent(&e))
@@ -308,45 +381,23 @@ int main(int argc, char *argv[])
                                 }
                                 else if (e.type == SDL_KEYDOWN)
                                 {
-                                    switch (e.key.keysym.sym)
-                                    {
-                                    case SDLK_SPACE:
-                                        ball.setVel(0, ball.speed / 2);
-                                        break;
-                                    case SDLK_a:
-                                    case SDLK_LEFT:
-                                        paddleTop.moveLeft();
-                                        paddleBottom.moveLeft();
-                                        break;
-                                    case SDLK_d:
-                                    case SDLK_RIGHT:
-                                        paddleTop.moveRight();
-                                        paddleBottom.moveRight();
-                                        break;
-                                    }
+                                    if (gameState == PLAYING1)
+                                        processPlaying1(e.key.keysym.sym);
+                                    else
+                                        processPlaying2(e.key.keysym.sym);
                                 }
                             }
                             delay();
                             update();
-                            render();
+                            renderPlayingGame();
                         }
                     }
-                    // if (gameState == PLAYING2)
-                    else if (gameState == PLAYING2)
-                    {
-                    }
-                    // if (gameState == EXIT)
                     else if (gameState == EXIT)
                     {
                         quit = true;
                     }
                 }
-
-                Uint32 frameTime = SDL_GetTicks() - frameStart;
-                if (frameTime < DELAY_TIME)
-                {
-                    SDL_Delay(DELAY_TIME - frameTime);
-                }
+                delay();
             }
         }
     }

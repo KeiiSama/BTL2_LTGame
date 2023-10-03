@@ -27,7 +27,7 @@ class Ball : public SDL_Rect
 {
 public:
     static const int size = 15;
-    static const int speed = 8;
+    static const int speed = 6;
     float velY, velX;
     Ball(int x = 100, int y = 100);
     void move();
