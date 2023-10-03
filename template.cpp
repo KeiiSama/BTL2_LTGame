@@ -34,21 +34,21 @@ Brick::Brick(int x, int y)
 {
     this->x = x;
     this->y = y;
-    this->w = WIDTH/30;
-    this->h = HEIGHT/30;
+    this->w = WIDTH / 30;
+    this->h = HEIGHT / 30;
 }
 
 Ball::Ball(int x, int y)
 {
-    this->x=x;
-    this->y=y;
-    this->radius=15;
+    this->x = x;
+    this->y = y;
+    this->radius = 15;
 }
 
 HorizontalLine::HorizontalLine(int y)
 {
-    this->y=y;
-    this->x=x;
-    this->w=WIDTH;
-    this->h=2;
+    this->y = y;
+    this->x = x;
+    this->w = WIDTH;
+    this->h = 2;
 }

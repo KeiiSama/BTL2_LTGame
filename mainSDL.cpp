@@ -2,33 +2,37 @@
 
 using namespace std;
 
-bool init() 
+bool init()
 {
     bool success = true;
 
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) 
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         cout << "Error: SDL_Init failed" << SDL_GetError() << endl;
         success = false;
-    }else 
+    }
+    else
     {
         window = SDL_CreateWindow("BTL2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
 
-        if(window == NULL)
+        if (window == NULL)
         {
             cout << "Error: SDL_CreateWindow failed" << SDL_GetError() << endl;
             success = false;
-        }else
+        }
+        else
         {
             renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-            if (renderer == NULL) {
+            if (renderer == NULL)
+            {
                 cout << "Error: SDL renderer creation failed" << SDL_GetError() << endl;
                 success = false;
             }
         }
     }
 
-    if(TTF_Init() == -1) {
+    if (TTF_Init() == -1)
+    {
         cout << "Error: TTF_Init() failed" << SDL_GetError() << endl;
         success = false;
     }
@@ -36,16 +40,17 @@ bool init()
     return success;
 }
 
-bool loadMedia() 
+bool loadMedia()
 {
     bool success = true;
-    
+
     screenSurface = SDL_GetWindowSurface(window);
-    if( screenSurface == NULL )
+    if (screenSurface == NULL)
     {
         cout << "Error: SDL_LoadBMP failed" << SDL_GetError() << endl;
         success = false;
-    }else
+    }
+    else
     {
         SDL_FillRect(screenSurface, NULL, 0);
 
@@ -57,18 +62,20 @@ bool loadMedia()
 
 void close()
 {
-    //Destroy window
-    SDL_DestroyWindow( window );
+    // Destroy window
+    SDL_DestroyWindow(window);
     window = NULL;
 
-    //Quit SDL subsystems
+    // Quit SDL subsystems
     SDL_Quit();
 
-    if(font) {
+    if (font)
+    {
         TTF_CloseFont(font);
     }
 
-    if(startButtonSurface) {
-        SDL_FreeSurface( startButtonSurface );
+    if (startButtonSurface)
+    {
+        SDL_FreeSurface(startButtonSurface);
     }
 }

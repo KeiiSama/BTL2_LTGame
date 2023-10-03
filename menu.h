@@ -5,7 +5,7 @@ bool loadMenu();
 
 bool loadMenuScreen();
 
-//void menuHoverButton(int x, int y);
+// void menuHoverButton(int x, int y);
 
 void hoverOneButton(int x, int y);
 
