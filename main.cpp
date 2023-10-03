@@ -61,6 +61,7 @@ Paddle paddleBottom(WIDTH / 2, HEIGHT - 20, WIDTH / 5, 10);
 HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW * COL];
 Ball ball;
+SDL_Rect scoreRect = {50, 50, 0, 0};
 int life = 3;
 int score = 0;
 int countScore = 0;
@@ -86,6 +87,8 @@ void delay()
 
 void renderPlayingGame()
 {
+    string scoreText = "Score: " + to_string(score);
+    SDL_Surface *coloredButton = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 50), scoreText.c_str(), {WHITE});
     SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
 
     // Vẽ thanh template
@@ -132,6 +135,7 @@ void renderPlayingGame()
     }
 
     SDL_BlitSurface(ball.image, NULL, screenSurface, &ball.rect);
+    SDL_BlitSurface(coloredButton, NULL, screenSurface, &scoreRect);
 
     SDL_UpdateWindowSurface(window);
 }
