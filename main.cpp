@@ -61,10 +61,17 @@ Paddle paddleBottom(WIDTH / 2, HEIGHT - 20, WIDTH / 5, 10);
 HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW * COL];
 Ball ball;
+SDL_Rect scoreRect = {50, 30, 0, 0};
 int life = 3;
 int score = 0;
 int countScore = 0;
 int level = 1;
+
+// Set timer
+SDL_Rect timerRect = {WIDTH - 400, 30, 0, 0};
+int time = 120;
+int currentTime = 0;
+int preTime = 0;
 
 void delay()
 {
@@ -86,6 +93,14 @@ void delay()
 
 void renderPlayingGame()
 {
+    //Score
+    string scoreText = "Score: " + to_string(score);
+    SDL_Surface *coloredButton = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 50), scoreText.c_str(), {WHITE});
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
+
+    //Timer
+    string timerText = "Time Left: " + to_string(time) + "s";
+    SDL_Surface *coloredButton1 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 50), timerText.c_str(), {WHITE});
     SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
 
     // Vẽ thanh template
@@ -132,6 +147,8 @@ void renderPlayingGame()
     }
 
     SDL_BlitSurface(ball.image, NULL, screenSurface, &ball.rect);
+    SDL_BlitSurface(coloredButton, NULL, screenSurface, &scoreRect);
+    SDL_BlitSurface(coloredButton1, NULL, screenSurface, &timerRect);
 
     SDL_UpdateWindowSurface(window);
 }
@@ -182,7 +199,7 @@ void update()
             }
             else
                 processGameOver();
-        ball.move();
+                ball.move();
 
         int countBrick = 0;
         for (int i = 0; i < COL * ROW; i++)
@@ -338,9 +355,10 @@ int main(int argc, char *argv[])
         {
             SDL_Event e;
             bool quit = false;
+            bool timerStarted = false;
 
             while (!quit)
-            {
+            {               
                 while (SDL_PollEvent(&e))
                 {
                     if (e.type == SDL_QUIT)
@@ -432,6 +450,7 @@ int main(int argc, char *argv[])
                         SDL_Event e;
                         bool quit = false;
                         initialBrick();
+
                         while (!quit)
                         {
                             while (SDL_PollEvent(&e))
@@ -446,8 +465,25 @@ int main(int argc, char *argv[])
                                         processPlaying1(e.key.keysym.sym);
                                     else
                                         processPlaying2(e.key.keysym.sym);
+
+                                    if (e.key.keysym.sym == SDLK_SPACE && time == 120 && !timerStarted)
+                                    {
+                                        currentTime = SDL_GetTicks();
+                                        preTime = currentTime;
+                                        timerStarted = true; // Đã bắt đầu tính thời gian
+                                    }
                                 }
                             }
+                            if(timerStarted) {
+                                currentTime = SDL_GetTicks();
+                                int elapsedTime = currentTime - preTime;
+
+                                if(time > 0 && elapsedTime >= 1000) {
+                                    time--;
+                                    preTime = currentTime;
+                                }
+                            }
+
                             delay();
                             update();
                             renderPlayingGame();
