@@ -86,54 +86,54 @@ void delay()
 
 void renderPlayingGame()
 {
-    SDL_SetRenderDrawColor(renderer, BLACK, 255);
-    SDL_RenderClear(renderer);
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
 
     // Vẽ thanh template
-    SDL_SetRenderDrawColor(renderer, WHITE, 255);
     if (gameState == PLAYING1)
     {
         if (player1 == TOP)
         {
-            SDL_RenderFillRect(renderer, &paddleBottom);
-            SDL_SetRenderDrawColor(renderer, RED, 255);
-            SDL_RenderFillRect(renderer, &paddleTop);
+            paddleTop.enable();
+            paddleBottom.disable();
+            SDL_BlitSurface(paddleBottom.image, NULL, screenSurface, &paddleBottom.rect);
+            SDL_BlitSurface(paddleTop.image, NULL, screenSurface, &paddleTop.rect);
         }
         if (player1 == BOTTOM)
         {
-            SDL_RenderFillRect(renderer, &paddleTop);
-            SDL_SetRenderDrawColor(renderer, RED, 255);
-            SDL_RenderFillRect(renderer, &paddleBottom);
+            paddleBottom.enable();
+            paddleTop.disable();
+            SDL_BlitSurface(paddleBottom.image, NULL, screenSurface, &paddleBottom.rect);
+            SDL_BlitSurface(paddleTop.image, NULL, screenSurface, &paddleTop.rect);
         }
     }
 
     if (gameState == PLAYING2)
     {
-        SDL_SetRenderDrawColor(renderer, RED, 255);
-        SDL_RenderFillRect(renderer, &paddleTop);
-        SDL_SetRenderDrawColor(renderer, GREEN, 255);
-        SDL_RenderFillRect(renderer, &paddleBottom);
+        SDL_BlitSurface(paddleBottom.image, NULL, screenSurface, &paddleBottom.rect);
+        SDL_BlitSurface(paddleTop.image, NULL, screenSurface, &paddleTop.rect);
     }
 
     if (life > 0)
-        SDL_SetRenderDrawColor(renderer, RED, 255);
+    {
+        SDL_FillRect(screenSurface, &lineTop, SDL_MapRGB(screenSurface->format, RED));
+        SDL_FillRect(screenSurface, &lineBottom, SDL_MapRGB(screenSurface->format, RED));
+    }
     else
-        SDL_SetRenderDrawColor(renderer, WHITE, 255);
-    SDL_RenderFillRect(renderer, &lineTop);
-    SDL_RenderFillRect(renderer, &lineBottom);
-    SDL_SetRenderDrawColor(renderer, WHITE, 255);
-
+    {
+        SDL_FillRect(screenSurface, &lineTop, SDL_MapRGB(screenSurface->format, WHITE));
+        SDL_FillRect(screenSurface, &lineBottom, SDL_MapRGB(screenSurface->format, WHITE));
+    }
     for (int i = 0; i < COL * ROW; i++)
     {
         if (!bricks[i].isBreak)
         {
-            SDL_RenderFillRect(renderer, &bricks[i]);
+            SDL_BlitSurface(bricks[i].image, NULL, screenSurface, &bricks[i].rect);
         }
     }
-    SDL_RenderFillRect(renderer, &ball);
 
-    // Cập nhật renderer
-    SDL_RenderPresent(renderer);
+    SDL_BlitSurface(ball.image, NULL, screenSurface, &ball.rect);
+
+    SDL_UpdateWindowSurface(window);
 }
 
 void processGameOver()
@@ -155,26 +155,26 @@ void update()
 {
     if (ball.isStopping())
     {
-        ball.x = paddleBottom.x + paddleBottom.w / 2;
-        ball.y = paddleBottom.y - 7 - 10;
+        ball.rect.x = paddleBottom.rect.x + paddleBottom.rect.w / 2;
+        ball.rect.y = paddleBottom.rect.y - 10 - ball.size;
     }
     else
     {
-        if (SDL_HasIntersection(&ball, &paddleBottom))
+        if (SDL_HasIntersection(&ball.rect, &paddleBottom.rect))
         {
-            double rel = (paddleBottom.x + (paddleBottom.w / 2)) - (ball.x + (ball.size / 2));
-            double norm = rel / (paddleBottom.w / 2);
+            double rel = (paddleBottom.rect.x + (paddleBottom.rect.w / 2)) - (ball.rect.x + (ball.size / 2));
+            double norm = rel / (paddleBottom.rect.w / 2);
             double bounce = norm * (5 * PI / 12);
             ball.setVel(-ball.speed * sin(bounce), -ball.speed * cos(bounce));
         }
-        if (SDL_HasIntersection(&ball, &paddleTop))
+        if (SDL_HasIntersection(&ball.rect, &paddleTop.rect))
         {
-            double rel = (paddleTop.x + (paddleTop.w / 2)) - (ball.x + (ball.size / 2));
-            double norm = rel / (paddleTop.w / 2);
+            double rel = (paddleTop.rect.x + (paddleTop.rect.w / 2)) - (ball.rect.x + (ball.size / 2));
+            double norm = rel / (paddleTop.rect.w / 2);
             double bounce = norm * (5 * PI / 12);
             ball.setVel(-ball.speed * sin(bounce), ball.speed * cos(bounce));
         }
-        if (SDL_HasIntersection(&ball, &lineBottom) || SDL_HasIntersection(&ball, &lineTop))
+        if (SDL_HasIntersection(&ball.rect, &lineBottom) || SDL_HasIntersection(&ball.rect, &lineTop))
             if (life > 0)
             {
                 life--;
@@ -189,7 +189,7 @@ void update()
         {
             if (!bricks[i].isBreak)
             {
-                if (SDL_HasIntersection(&ball, &bricks[i]))
+                if (SDL_HasIntersection(&ball.rect, &bricks[i].rect))
                 {
                     bricks[i].isBreak = true;
                     score++;
@@ -199,7 +199,7 @@ void update()
                         countScore = 0;
                         life++;
                     }
-                    if (ball.x <= bricks[i].x)
+                    if (ball.rect.x <= bricks[i].rect.x)
                     {
                         // canh trai
                         if (ball.velX == 0)
@@ -209,7 +209,7 @@ void update()
                     }
                     else
                     {
-                        if (ball.y <= bricks[i].y)
+                        if (ball.rect.y <= bricks[i].rect.y)
                         {
                             // canh tren
                             if (ball.velY == 0)
@@ -219,7 +219,7 @@ void update()
                         }
                         else
                         {
-                            if (bricks[i].x + bricks[i].w - ball.x < 2)
+                            if (bricks[i].rect.x + bricks[i].rect.w - ball.rect.x < 2)
                             {
                                 // canh phai
                                 if (ball.velX == 0)
@@ -253,12 +253,12 @@ void update()
 
 void initialBrick()
 {
-    int relX = WIDTH / 2 - (SPACING + bricks[0].w) * COL / 2;
-    int relY = (HEIGHT - 80) / 2 - (SPACING + bricks[0].h) * ROW / 2;
+    int relX = WIDTH / 2 - (SPACING + bricks[0].rect.w) * COL / 2;
+    int relY = (HEIGHT - 80) / 2 - (SPACING + bricks[0].rect.h) * ROW / 2;
     for (int i = 0; i < COL * ROW; i++)
     {
-        bricks[i].x = relX + (((i % COL) + 1) * SPACING) + ((i % COL) * bricks[i].w) - (SPACING / 2);
-        bricks[i].y = relY + bricks[i].h * 3 + (((i % ROW) + 1) * SPACING) + ((i % ROW) * bricks[i].h) - (SPACING / 2);
+        bricks[i].rect.x = relX + (((i % COL) + 1) * SPACING) + ((i % COL) * bricks[i].rect.w) - (SPACING / 2);
+        bricks[i].rect.y = relY + bricks[i].rect.h * 3 + (((i % ROW) + 1) * SPACING) + ((i % ROW) * bricks[i].rect.h) - (SPACING / 2);
     }
 }
 

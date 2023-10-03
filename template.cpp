@@ -1,56 +1,71 @@
 #include "template.h"
-
+#include "mainSDL.h"
 using namespace std;
 
 Paddle::Paddle(int x, int y, int width, int height)
 {
-    this->x = x;
-    this->y = y;
-    this->w = width;
-    this->h = height;
+    rect.x = x;
+    rect.y = y;
+    image = IMG_Load("bar.png");
+    rect.w = image->w;
+    rect.h = image->h;
+}
+
+void Paddle::disable()
+{
+    image = IMG_Load("bar_disabled.png");
+}
+
+void Paddle::enable()
+{
+    image = IMG_Load("bar.png");
 }
 
 void Paddle::moveLeft()
 {
-    this->x -= moveSpeed;
-    this->validatePosition();
+    rect.x -= moveSpeed;
+    validatePosition();
 }
 
 void Paddle::moveRight()
 {
-    this->x += moveSpeed;
-    this->validatePosition();
+    rect.x += moveSpeed;
+    validatePosition();
 }
 
 void Paddle::validatePosition()
 {
-    if (this->x < 0)
-        this->x = 0;
-    if (this->x + this->w > WIDTH)
-        this->x = WIDTH - this->w;
+    if (rect.x < 0)
+        rect.x = 0;
+    if (rect.x + rect.w > WIDTH)
+        rect.x = WIDTH - rect.w;
 }
 
 Brick::Brick(int x, int y)
 {
-    this->x = x;
-    this->y = y;
-    this->w = WIDTH / 30;
-    this->h = HEIGHT / 30;
+    rect.x = x;
+    rect.y = y;
+    image = IMG_Load("brick.jpg");
+    rect.h = image->h;
+    rect.w = image->w;
 }
 
 Ball::Ball(int x, int y)
 {
-    this->x = x;
-    this->y = y;
-    this->w = this->h = this->size;
-    this->velY = 0;
-    this->velX = 0;
+    rect.x = x;
+    rect.y = y;
+    image = IMG_Load("ball.png");
+    rect.w = image->w;
+    rect.h = image->h;
+    velY = 0;
+    velX = 0;
+    size = rect.w;
 }
 
 void Ball::setPosition(int x, int y)
 {
-    this->x = x;
-    this->x = x;
+    rect.x = x;
+    rect.y = x;
 }
 
 void Ball::setVel(int velX, int velY)
@@ -61,10 +76,10 @@ void Ball::setVel(int velX, int velY)
 
 void Ball::move()
 {
-    if (this->x <= 0 || this->x + this->size >= WIDTH)
+    if (rect.x <= 0 || rect.x + size >= WIDTH)
         velX = -velX;
-    this->x += this->velX;
-    this->y += this->velY;
+    rect.x += this->velX;
+    rect.y += this->velY;
 }
 
 bool Ball::isStopping()

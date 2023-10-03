@@ -13,7 +13,6 @@
 #define GREEN 0, 255, 0
 #define WHITE 255, 255, 255
 #define BLACK 0, 0, 0
-#define MOVESPEED 10
 #define COL 13 // odd
 #define ROW 8  // even
 #define PI 3.14159265358979323846

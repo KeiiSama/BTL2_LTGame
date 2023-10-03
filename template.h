@@ -4,7 +4,7 @@
 #include "main.h"
 #include "mainSDL.h"
 
-class Paddle : public SDL_Rect
+class Paddle
 {
 private:
     static const int moveSpeed = 30;
@@ -12,24 +12,32 @@ private:
 
 public:
     Paddle(int x, int y, int width, int height);
+    SDL_Surface *image;
+    SDL_Rect rect;
+    void disable();
+    void enable();
     void moveLeft();
     void moveRight();
 };
 
-class Brick : public SDL_Rect
+class Brick
 {
 public:
     Brick(int x = 0, int y = 0);
+    SDL_Surface *image;
+    SDL_Rect rect;
     bool isBreak = false;
 };
 
-class Ball : public SDL_Rect
+class Ball
 {
 public:
-    static const int size = 15;
     static const int speed = 6;
     float velY, velX;
+    int size;
     Ball(int x = 100, int y = 100);
+    SDL_Surface *image;
+    SDL_Rect rect;
     void move();
     void setPosition(int x, int y);
     void setVel(int velX, int velY);
