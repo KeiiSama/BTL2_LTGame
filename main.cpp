@@ -378,6 +378,7 @@ void resetGame()
     level = 1;
     life = 3;
     countScore = 0;
+    ball.setVel(0, 0);
     for (int i = 0; i < COL * ROW; i++)
     {
         bricks[i].isBreak = false;
@@ -498,6 +499,7 @@ int main(int argc, char *argv[])
                     {
                         SDL_Event e;
                         bool quit = false;
+                        timerStarted = false;
                         resetGame();
                         initialBrick();
 
@@ -521,6 +523,13 @@ int main(int argc, char *argv[])
                                         processPlaying1(e.key.keysym.sym);
                                     else
                                         processPlaying2(e.key.keysym.sym);
+                                    if (e.key.keysym.sym == SDLK_ESCAPE)
+                                    {
+                                        SDL_FillRect(screenSurface, NULL, 0);
+                                        gameState = MENU;
+                                        quit = true;
+                                        break;
+                                    }
 
                                     if (e.key.keysym.sym == SDLK_SPACE && time == 30 && !timerStarted)
                                     {
@@ -550,9 +559,12 @@ int main(int argc, char *argv[])
                             {
                                 overComeLevel();
                             }
-                            delay();
-                            update();
-                            renderPlayingGame();
+                            if (!quit)
+                            {
+                                delay();
+                                update();
+                                renderPlayingGame();
+                            }
                         }
                     }
                     else if (gameState == GAMEOVER)
