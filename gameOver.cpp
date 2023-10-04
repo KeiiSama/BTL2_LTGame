@@ -135,4 +135,3 @@ void renderButton2()
 
     SDL_UpdateWindowSurface(window);
 }
-

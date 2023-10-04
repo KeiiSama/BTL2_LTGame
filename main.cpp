@@ -63,6 +63,7 @@ HorizontalLine lineBottom(HEIGHT - 5);
 Brick bricks[ROW * COL];
 Ball ball;
 SDL_Rect scoreRect = {50, 30, 0, 0};
+SDL_Rect levelRect = {WIDTH / 2 - 50, 30, 0, 0};
 int life = 3;
 int score = 0;
 int countScore = 0;
@@ -75,17 +76,18 @@ int currentTime = 0;
 int preTime = 0;
 
 // Game Over
-SDL_Rect gameOverRect = {WIDTH/4 - 100, HEIGHT/3 - 100, 0, 0};
+SDL_Rect gameOverRect = {WIDTH / 4 - 100, HEIGHT / 3 - 100, 0, 0};
 
-SDL_Rect showScoreRect = {WIDTH/4, gameOverRect.y + 200, 0, 0};
+SDL_Rect showScoreRect = {WIDTH / 4, gameOverRect.y + 200, 0, 0};
 
-SDL_Rect button1Rect = {WIDTH/3, showScoreRect.y + 150, 0, 0};
+SDL_Rect button1Rect = {WIDTH / 3, showScoreRect.y + 150, 0, 0};
 bool isButton1Hovered = false;
 bool isButton1Clicked = false;
 
-SDL_Rect button2Rect = {WIDTH/3 + 150, button1Rect.y + 100, 0, 0};
+SDL_Rect button2Rect = {WIDTH / 3 + 150, button1Rect.y + 100, 0, 0};
 bool isButton2Hovered = false;
 bool isButton2Clicked = false;
+bool isOver = false;
 
 void delay()
 {
@@ -107,13 +109,15 @@ void delay()
 
 void renderPlayingGame()
 {
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
     string scoreText = "Score: " + to_string(score);
     SDL_Surface *coloredButton = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 50), scoreText.c_str(), {WHITE});
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
 
     string timeText = "Time Left: " + to_string(time) + "s";
     SDL_Surface *coloredButton1 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 50), timeText.c_str(), {WHITE});
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, GREEN));
+
+    string levelText = "Level " + to_string(level);
+    SDL_Surface *coloredButton2 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 50), levelText.c_str(), {WHITE});
 
     // Vẽ thanh template
     if (gameState == PLAYING1)
@@ -161,6 +165,7 @@ void renderPlayingGame()
     SDL_BlitSurface(ball.image, NULL, screenSurface, &ball.rect);
     SDL_BlitSurface(coloredButton, NULL, screenSurface, &scoreRect);
     SDL_BlitSurface(coloredButton1, NULL, screenSurface, &timerRect);
+    SDL_BlitSurface(coloredButton2, NULL, screenSurface, &levelRect);
 
     SDL_UpdateWindowSurface(window);
 }
@@ -169,6 +174,17 @@ void processGameOver()
 {
     ball.setVel(0, 0);
     ball.velY = -ball.velY;
+    isOver = true;
+}
+
+bool isBreakingAllBricks()
+{
+    for (int i = 0; i < COL * ROW; i++)
+    {
+        if (!bricks[i].isBreak)
+            return false;
+    }
+    return true;
 }
 
 void overComeLevel()
@@ -210,10 +226,12 @@ void update()
                 ball.velY = -ball.velY;
             }
             else
+            {
                 processGameOver();
-                ball.move();
+                return;
+            }
+        ball.move();
 
-        int countBrick = 0;
         for (int i = 0; i < COL * ROW; i++)
         {
             if (!bricks[i].isBreak)
@@ -267,14 +285,6 @@ void update()
                         }
                     }
                 }
-            }
-            else
-            {
-                countBrick++;
-            }
-            if (countBrick == ROW * COL)
-            {
-                overComeLevel();
             }
         }
     }
@@ -351,7 +361,7 @@ void processPlaying2(int key)
     SDL_FillRect(screenSurface, NULL, 0);
 
     SDL_Surface* coloredButton1 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 100), "GAME OVER", {WHITE});
-    SDL_Surface* coloredButton2 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 75), 
+    SDL_Surface* coloredButton2 = TTF_RenderText_Solid(TTF_OpenFont("ERASBD.TTF", 75),
                                                             ("YOUR SCORE: " + to_string(score)).c_str(), {WHITE});
 
     SDL_BlitSurface(coloredButton1, NULL, screenSurface, &gameOverRect);
@@ -359,6 +369,20 @@ void processPlaying2(int key)
 
     SDL_UpdateWindowSurface(window);
 }*/
+
+void resetGame()
+{
+    isOver = false;
+    time = 30;
+    score = 0;
+    level = 1;
+    life = 3;
+    countScore = 0;
+    for (int i = 0; i < COL * ROW; i++)
+    {
+        bricks[i].isBreak = false;
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -383,7 +407,7 @@ int main(int argc, char *argv[])
             bool timerStarted = false;
 
             while (!quit)
-            {               
+            {
                 while (SDL_PollEvent(&e))
                 {
                     if (e.type == SDL_QUIT)
@@ -474,10 +498,17 @@ int main(int argc, char *argv[])
                     {
                         SDL_Event e;
                         bool quit = false;
+                        resetGame();
                         initialBrick();
 
                         while (!quit)
                         {
+                            if (isOver)
+                            {
+                                gameState = GAMEOVER;
+                                quit = true;
+                                break;
+                            }
                             while (SDL_PollEvent(&e))
                             {
                                 if (e.type == SDL_QUIT)
@@ -511,19 +542,22 @@ int main(int argc, char *argv[])
                                 }
                             }
 
+                            if (time == 0 && !isBreakingAllBricks())
+                            {
+                                isOver = true;
+                            }
+                            else if (isBreakingAllBricks())
+                            {
+                                overComeLevel();
+                            }
                             delay();
                             update();
                             renderPlayingGame();
-
-                            if (time == 0)
-                            {
-                                gameState = GAMEOVER;
-                                quit = true; 
-                            }
                         }
                     }
-                    else if(gameState == GAMEOVER) {
-                        //renderGameOverScreen();
+                    else if (gameState == GAMEOVER)
+                    {
+                        // renderGameOverScreen();
                         SDL_FillRect(screenSurface, NULL, 0);
 
                         SDL_Event e;
@@ -531,9 +565,10 @@ int main(int argc, char *argv[])
 
                         while (!quit)
                         {
-                            while(SDL_PollEvent(&e)) 
+                            while (SDL_PollEvent(&e))
                             {
-                                if(e.type == SDL_QUIT) {
+                                if (e.type == SDL_QUIT)
+                                {
                                     quit = true;
                                 }
                                 else if (e.type == SDL_MOUSEMOTION)
@@ -549,7 +584,6 @@ int main(int argc, char *argv[])
 
                                     isButton2Hover(mouseX, mouseY);
                                     renderButton2();
-
                                 }
                                 else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
                                 {
