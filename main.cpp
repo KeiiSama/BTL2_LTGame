@@ -71,7 +71,7 @@ int level = 1;
 
 // Set timer
 SDL_Rect timerRect = {WIDTH - 400, 30, 0, 0};
-int time = 30;
+int time = 120;
 int currentTime = 0;
 int preTime = 0;
 
@@ -190,6 +190,7 @@ bool isBreakingAllBricks()
 void overComeLevel()
 {
     level++;
+    ball.speed += 5;
     for (int i = 0; i < ROW * COL; i++)
     {
         bricks[i].isBreak = false;
@@ -246,41 +247,48 @@ void update()
                         countScore = 0;
                         life++;
                     }
-                    if (ball.rect.x <= bricks[i].rect.x)
+                    if (ball.velX == 0 || ball.velY == 0)
                     {
-                        // canh trai
-                        if (ball.velX == 0)
-                            ball.velY = -ball.velY;
-                        else
-                            ball.velX = -ball.velX;
+                        ball.velY = -ball.velY;
+                        ball.velX = -ball.velX;
                     }
                     else
                     {
-                        if (ball.rect.y <= bricks[i].rect.y)
+                        int xCenter = ball.rect.x + ball.size / 2;
+                        int yCenter = ball.rect.y + ball.size / 2;
+                        int c = ball.velX * yCenter - ball.velY * xCenter;
+                        if (ball.velY > 0) // banh bay tu tren xuong
                         {
-                            // canh tren
-                            if (ball.velY == 0)
-                                ball.velX = -ball.velX;
-                            else
+                            int result = (ball.velY * bricks[i].rect.x - ball.velX * bricks[i].rect.y + c) * (ball.velY * (bricks[i].rect.x + bricks[i].rect.w) - ball.velX * bricks[i].rect.y + c);
+                            if (result == 0)
+                            {
                                 ball.velY = -ball.velY;
-                        }
-                        else
-                        {
-                            if (bricks[i].rect.x + bricks[i].rect.w - ball.rect.x < 2)
-                            {
-                                // canh phai
-                                if (ball.velX == 0)
-                                    ball.velY = -ball.velY;
-                                else
-                                    ball.velX = -ball.velX;
+                                ball.velX = -ball.velX;
                             }
-                            else
+                            else if (result < 0) // canh tren
                             {
-                                // canh duoi
-                                if (ball.velY == 0)
-                                    ball.velX = -ball.velX;
-                                else
-                                    ball.velY = -ball.velY;
+                                ball.velY = -ball.velY;
+                            }
+                            else // canh trai hoac phai
+                            {
+                                ball.velX = -ball.velX;
+                            }
+                        }
+                        else // banh bay tu duoi len
+                        {
+                            int result = (ball.velY * bricks[i].rect.x - ball.velX * (bricks[i].rect.y + bricks[i].rect.h) + c) * (ball.velY * (bricks[i].rect.x + bricks[i].rect.w) - ball.velX * (bricks[i].rect.y + bricks[i].rect.h) + c);
+                            if (result == 0)
+                            {
+                                ball.velY = -ball.velY;
+                                ball.velX = -ball.velX;
+                            }
+                            else if (result < 0) // canh duoi
+                            {
+                                ball.velY = -ball.velY;
+                            }
+                            else // canh trai hoac phai
+                            {
+                                ball.velX = -ball.velX;
                             }
                         }
                     }
@@ -373,7 +381,7 @@ void processPlaying2(int key)
 void resetGame()
 {
     isOver = false;
-    time = 30;
+    time = 360;
     score = 0;
     level = 1;
     life = 3;
@@ -531,7 +539,7 @@ int main(int argc, char *argv[])
                                         break;
                                     }
 
-                                    if (e.key.keysym.sym == SDLK_SPACE && time == 30 && !timerStarted)
+                                    if (e.key.keysym.sym == SDLK_SPACE && time == 360 && !timerStarted)
                                     {
                                         currentTime = SDL_GetTicks();
                                         preTime = currentTime;

@@ -32,7 +32,7 @@ public:
 class Ball
 {
 public:
-    static const int speed = 6;
+    int speed = 6;
     float velY, velX;
     int size;
     Ball(int x = 100, int y = 100);
