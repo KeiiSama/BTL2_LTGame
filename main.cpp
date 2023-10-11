@@ -191,6 +191,7 @@ void overComeLevel()
 {
     level++;
     ball.speed += 5;
+    ball.setVel(0, 0);
     for (int i = 0; i < ROW * COL; i++)
     {
         bricks[i].isBreak = false;
@@ -387,6 +388,7 @@ void resetGame()
     life = 3;
     countScore = 0;
     ball.setVel(0, 0);
+    ball.speed = 6;
     for (int i = 0; i < COL * ROW; i++)
     {
         bricks[i].isBreak = false;
@@ -565,6 +567,8 @@ int main(int argc, char *argv[])
                             }
                             else if (isBreakingAllBricks())
                             {
+                                time = 360;
+                                timerStarted = false;
                                 overComeLevel();
                             }
                             if (!quit)
