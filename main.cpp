@@ -88,6 +88,7 @@ SDL_Rect button2Rect = {WIDTH / 3 + 150, button1Rect.y + 100, 0, 0};
 bool isButton2Hovered = false;
 bool isButton2Clicked = false;
 bool isOver = false;
+bool initPlaying = false;
 
 void delay()
 {
@@ -415,7 +416,7 @@ int main(int argc, char *argv[])
             bool quit = false;
             bool timerStarted = false;
 
-            while (!quit)
+            while (!quit || SDL_PollEvent(&e))
             {
                 while (SDL_PollEvent(&e))
                 {
@@ -451,6 +452,10 @@ int main(int argc, char *argv[])
                     // if (gameState == MENU)
                     else if (gameState == MENU)
                     {
+                        if (initPlaying)
+                        {
+                            initPlaying = false;
+                        }
                         if (e.type == SDL_MOUSEMOTION)
                         {
                             int mouseX, mouseY;
@@ -505,129 +510,100 @@ int main(int argc, char *argv[])
                     }
                     else if (gameState == PLAYING1 || gameState == PLAYING2)
                     {
-                        SDL_Event e;
-                        bool quit = false;
-                        timerStarted = false;
-                        resetGame();
-                        initialBrick();
-
-                        while (!quit)
+                        if (!initPlaying)
                         {
-                            if (isOver)
-                            {
-                                gameState = GAMEOVER;
-                                quit = true;
-                                break;
-                            }
-                            while (SDL_PollEvent(&e))
-                            {
-                                if (e.type == SDL_QUIT)
-                                {
-                                    quit = true;
-                                }
-                                else if (e.type == SDL_KEYDOWN)
-                                {
-                                    if (gameState == PLAYING1)
-                                        processPlaying1(e.key.keysym.sym);
-                                    else
-                                        processPlaying2(e.key.keysym.sym);
-                                    if (e.key.keysym.sym == SDLK_ESCAPE)
-                                    {
-                                        SDL_FillRect(screenSurface, NULL, 0);
-                                        gameState = MENU;
-                                        quit = true;
-                                        break;
-                                    }
+                            initPlaying = true;
+                            timerStarted = false;
+                            resetGame();
+                            initialBrick();
+                        }
 
-                                    if (e.key.keysym.sym == SDLK_SPACE && time == 360 && !timerStarted)
-                                    {
-                                        currentTime = SDL_GetTicks();
-                                        preTime = currentTime;
-                                        timerStarted = true; // Đã bắt đầu tính thời gian
-                                    }
-                                }
+                        if (isOver)
+                        {
+                            gameState = GAMEOVER;
+                        }
+                        if (e.type == SDL_KEYDOWN)
+                        {
+                            if (gameState == PLAYING1)
+                                processPlaying1(e.key.keysym.sym);
+                            else
+                                processPlaying2(e.key.keysym.sym);
+                            if (e.key.keysym.sym == SDLK_ESCAPE)
+                            {
+                                SDL_FillRect(screenSurface, NULL, 0);
+                                gameState = MENU;
                             }
-                            if (timerStarted)
+
+                            if (e.key.keysym.sym == SDLK_SPACE && time == 360 && !timerStarted)
                             {
                                 currentTime = SDL_GetTicks();
-                                int elapsedTime = currentTime - preTime;
+                                preTime = currentTime;
+                                timerStarted = true; // Đã bắt đầu tính thời gian
+                            }
+                        }
+                        if (timerStarted)
+                        {
+                            currentTime = SDL_GetTicks();
+                            int elapsedTime = currentTime - preTime;
 
-                                if (time > 0 && elapsedTime >= 1000)
-                                {
-                                    time--;
-                                    preTime = currentTime;
-                                }
+                            if (time > 0 && elapsedTime >= 1000)
+                            {
+                                time--;
+                                preTime = currentTime;
                             }
+                        }
 
-                            if (time == 0 && !isBreakingAllBricks())
-                            {
-                                isOver = true;
-                            }
-                            else if (isBreakingAllBricks())
-                            {
-                                overComeLevel();
-                            }
-                            if (!quit)
-                            {
-                                delay();
-                                update();
-                                renderPlayingGame();
-                            }
+                        if (time == 0 && !isBreakingAllBricks())
+                        {
+                            isOver = true;
+                        }
+                        else if (isBreakingAllBricks())
+                        {
+                            overComeLevel();
                         }
                     }
                     else if (gameState == GAMEOVER)
                     {
+                        if (initPlaying)
+                        {
+                            initPlaying = false;
+                        }
                         // renderGameOverScreen();
                         SDL_FillRect(screenSurface, NULL, 0);
 
-                        SDL_Event e;
-                        bool quit = false;
-
-                        while (!quit)
+                        if (e.type == SDL_MOUSEMOTION)
                         {
-                            while (SDL_PollEvent(&e))
+                            int mouseX, mouseY;
+                            SDL_GetMouseState(&mouseX, &mouseY);
+
+                            renderGameOver();
+                            renderShowScore();
+
+                            isButton1Hover(mouseX, mouseY);
+                            renderButton1();
+
+                            isButton2Hover(mouseX, mouseY);
+                            renderButton2();
+                        }
+                        else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
+                        {
+                            int mouseX, mouseY;
+                            SDL_GetMouseState(&mouseX, &mouseY);
+                            if (isButton1Hovered)
                             {
-                                if (e.type == SDL_QUIT)
+                                isButton1Click(mouseX, mouseY);
+                                if (isButton1Clicked)
                                 {
-                                    quit = true;
+                                    SDL_FillRect(screenSurface, NULL, 0);
+                                    gameState = MENU;
                                 }
-                                else if (e.type == SDL_MOUSEMOTION)
+                            }
+                            else if (isButton2Hovered)
+                            {
+                                isButton2Click(mouseX, mouseY);
+                                if (isButton2Clicked)
                                 {
-                                    int mouseX, mouseY;
-                                    SDL_GetMouseState(&mouseX, &mouseY);
-
-                                    renderGameOver();
-                                    renderShowScore();
-
-                                    isButton1Hover(mouseX, mouseY);
-                                    renderButton1();
-
-                                    isButton2Hover(mouseX, mouseY);
-                                    renderButton2();
-                                }
-                                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT)
-                                {
-                                    int mouseX, mouseY;
-                                    SDL_GetMouseState(&mouseX, &mouseY);
-                                    if (isButton1Hovered)
-                                    {
-                                        isButton1Click(mouseX, mouseY);
-                                        if (isButton1Clicked)
-                                        {
-                                            SDL_FillRect(screenSurface, NULL, 0);
-                                            gameState = MENU;
-                                            quit = true;
-                                        }
-                                    }
-                                    else if (isButton2Hovered)
-                                    {
-                                        isButton2Click(mouseX, mouseY);
-                                        if (isButton2Clicked)
-                                        {
-                                            gameState = EXIT;
-                                            quit = true;
-                                        }
-                                    }
+                                    gameState = EXIT;
                                 }
                             }
                         }
@@ -636,6 +612,11 @@ int main(int argc, char *argv[])
                     {
                         quit = true;
                     }
+                }
+                if (gameState == PLAYING1 || gameState == PLAYING2)
+                {
+                    update();
+                    renderPlayingGame();
                 }
                 delay();
             }
